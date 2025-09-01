@@ -1,20 +1,17 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
-import { Link } from "react-router";
 import { getResponsableMe, Responsable } from "../../api/responsableService";
+import { logout } from "../../api/loginService";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<Responsable | null>(null);
+  const navigate = useNavigate();
 
-  function toggleDropdown() {
-    setIsOpen(!isOpen);
-  }
-
-  function closeDropdown() {
-    setIsOpen(false);
-  }
+  const toggleDropdown = () => setIsOpen(!isOpen);
+  const closeDropdown = () => setIsOpen(false);
 
   // Charger les données du responsable connecté
   useEffect(() => {
@@ -31,6 +28,15 @@ export default function UserDropdown() {
 
   // Initiale de l'utilisateur (R par défaut si pas de user)
   const initial = user ? user.prenom?.charAt(0).toUpperCase() : "R";
+
+  const handleLogout = async () => {
+    try {
+      await logout(); // supprime le token + nettoie la session
+      navigate("/signin");
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    }
+  };
 
   return (
     <div className="relative">
@@ -94,12 +100,13 @@ export default function UserDropdown() {
           </li>
         </ul>
 
-        <Link
-          to="/signin"
-          className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+        {/* Bouton Déconnexion */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2 mt-3 w-full font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
         >
           Déconnexion
-        </Link>
+        </button>
       </Dropdown>
     </div>
   );

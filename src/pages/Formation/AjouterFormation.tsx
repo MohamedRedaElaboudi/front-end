@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
-import FormationForm from "../../components/form/formFormation/FormationForm"
+import FormationForm from "../../components/form/formFormation/FormationForm";
 import Button from "../../components/ui/button/Button";
 import { ajouterFormateur, ajouterFormation } from "../../api/formationService";
 import { ajouterParticipation } from "../../api/participationService";
@@ -37,7 +37,7 @@ export default function AjouterFormation() {
         formateur: { id: formateur.id },
       });
 
-      // Ajout des participations pour chaque employé sélectionné
+      // Ajout des participations
       if (selectedPersonnesConcernees.length > 0) {
         const promises = selectedPersonnesConcernees.map((participantId) =>
           ajouterParticipation({
@@ -57,18 +57,21 @@ export default function AjouterFormation() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen p-6 bg-gray-50 dark:bg-gray-950">
       <PageMeta title="Ajouter Formation" description="Page d'ajout de formation" />
+
+      {/* Breadcrumb en haut de page */}
       <PageBreadcrumb pageTitle="Ajouter Formation" />
-      <div className="min-h-screen rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="text-center">
-          <FormationForm
-            onDataChange={setFormData}
-            onSelectedEmployeesChange={setSelectedPersonnesConcernees}
-          />
-          <div className="my-4 mx-auto flex justify-center">
-            <Button onClick={handleFormationSubmit}>Ajouter Formation</Button>
-          </div>
+
+      {/* Carte contenant le formulaire */}
+      <div className="max-w-4xl mx-auto mt-6 rounded-2xl border border-gray-200 bg-white  shadow-lg dark:border-gray-800 dark:bg-gray-900">
+        <FormationForm
+          onDataChange={setFormData}
+          onSelectedEmployeesChange={setSelectedPersonnesConcernees}
+        />
+
+        <div className="m-6 flex justify-center">
+          <Button onClick={handleFormationSubmit}>Ajouter Formation</Button>
         </div>
       </div>
     </div>

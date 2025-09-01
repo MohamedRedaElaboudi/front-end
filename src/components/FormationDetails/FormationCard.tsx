@@ -7,6 +7,7 @@ import Label from "../form/Label";
 import {
   getFormationById,
   updateFormation,
+  getAllFormateurs, // On récupère tous les formateurs
 } from "../../api/formationService";
 import { FormulairesService } from "../../api/formulaireService";
 import ParticipantsTable from "../../pages/Tables/ParticipantsTablefold/ParticipantsTable";
@@ -19,11 +20,17 @@ export default function FormationCard({ formationId }: { formationId: number }) 
   const [isOpen, setIsOpen] = useState(false);
   const [formation, setFormation] = useState<any>(null);
   const [formulaire, setFormulaire] = useState<any>(null);
+  const [formateurs, setFormateurs] = useState<any[]>([]);
 
   const [isParticipantModalOpen, setIsParticipantModalOpen] = useState(false);
   const [selectedParticipantIds, setSelectedParticipantIds] = useState<number[]>([]);
 
-  const openModal = () => setIsOpen(true);
+  const [editedFormation, setEditedFormation] = useState<any>({});
+
+  const openModal = () => {
+    setEditedFormation({ ...formation });
+    setIsOpen(true);
+  };
   const closeModal = () => setIsOpen(false);
   const openParticipantModal = () => setIsParticipantModalOpen(true);
   const closeParticipantModal = () => setIsParticipantModalOpen(false);
@@ -31,13 +38,15 @@ export default function FormationCard({ formationId }: { formationId: number }) 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [formationData, formulaireData] = await Promise.all([
+        const [formationData, formulaireData, formateursData] = await Promise.all([
           getFormationById(formationId),
           FormulairesService.getByFormationId(formationId),
+          getAllFormateurs(), // récupérer tous les formateurs
         ]);
 
         setFormation(formationData);
         setFormulaire(formulaireData);
+        setFormateurs(formateursData);
       } catch (error) {
         console.error("Erreur chargement formation ou formulaire", error);
       }
@@ -47,7 +56,9 @@ export default function FormationCard({ formationId }: { formationId: number }) 
 
   const handleSave = async () => {
     try {
-      const payload = { id: formationId };
+      const payload = {
+        ...editedFormation,
+      };
       const updated = await updateFormation(formationId, payload);
       setFormation(updated);
       closeModal();
@@ -104,7 +115,9 @@ export default function FormationCard({ formationId }: { formationId: number }) 
           </h4>
 
           <div className="flex flex-wrap gap-2">
-            {statut === "en_cours_de_validation" && (
+            {(statut === "en_cours_de_validation" ||
+              statut === "non_valide" ||
+              statut === "valide") && (
               <Button onClick={openModal} className="bg-blue-600 hover:bg-blue-700">
                 Modifier
               </Button>
@@ -127,12 +140,6 @@ export default function FormationCard({ formationId }: { formationId: number }) 
                   </Button>
                 )}
               </>
-            )}
-
-            {statut === "non_valide" && (
-              <Button onClick={openModal} className="bg-blue-600 hover:bg-blue-700">
-                Modifier
-              </Button>
             )}
 
             {statut === "termine" && (
@@ -200,7 +207,7 @@ export default function FormationCard({ formationId }: { formationId: number }) 
             <Button
               onClick={() =>
                 window.open(
-                  `${window.location.origin}/evualiationformationachaud/${formationId}`,
+                  `${window.location.origin}/evaluationformationachaud/${formationId}`,
                   "_blank"
                 )
               }
@@ -232,17 +239,95 @@ export default function FormationCard({ formationId }: { formationId: number }) 
             Modifier la formation
           </h4>
           <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-            Ici on envoie uniquement l’ID de la formation.
+            Modifiez les informations ci-dessous.
           </p>
 
           <form
-            className="flex flex-col"
+            className="grid grid-cols-1 gap-4 lg:grid-cols-2"
             onSubmit={(e) => {
               e.preventDefault();
               handleSave();
             }}
           >
-            <div className="flex items-center gap-3 mt-6 lg:justify-end">
+            <div>
+              <Label>Thème</Label>
+              <Input
+                value={editedFormation.theme || ""}
+                onChange={(e) =>
+                  setEditedFormation({ ...editedFormation, theme: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <Label>Lieu</Label>
+              <Input
+                value={editedFormation.lieu || ""}
+                onChange={(e) =>
+                  setEditedFormation({ ...editedFormation, lieu: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <Label>Type</Label>
+              <Input
+                value={editedFormation.type || ""}
+                onChange={(e) =>
+                  setEditedFormation({ ...editedFormation, type: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <Label>Date début</Label>
+              <Input
+                type="date"
+                value={editedFormation.dateDebut?.split("T")[0] || ""}
+                onChange={(e) =>
+                  setEditedFormation({ ...editedFormation, dateDebut: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <Label>Date fin</Label>
+              <Input
+                type="date"
+                value={editedFormation.dateFin?.split("T")[0] || ""}
+                onChange={(e) =>
+                  setEditedFormation({ ...editedFormation, dateFin: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <Label>Formateur</Label>
+              <select
+                value={editedFormation.formateur?.id || ""}
+                onChange={(e) =>
+                  setEditedFormation({
+                    ...editedFormation,
+                    formateur: formateurs.find((f) => f.id === parseInt(e.target.value)),
+                  })
+                }
+                className="w-full p-2 border rounded-lg"
+              >
+                <option value="">-- Sélectionner un formateur --</option>
+                {formateurs.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.nomFormateur}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <Label>Statut</Label>
+              <Input value={editedFormation.statut || ""} disabled />
+            </div>
+
+            <div className="flex items-center gap-3 mt-4 lg:col-span-2 justify-end">
               <Button size="sm" variant="outline" onClick={closeModal}>
                 Annuler
               </Button>

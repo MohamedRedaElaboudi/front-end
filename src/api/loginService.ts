@@ -16,8 +16,8 @@ export async function login(email: string, password: string): Promise<string> {
 
     const token = response.data.token;
 
-    // Stocke le token dans localStorage
-    localStorage.setItem("jwtToken", response.data.token);
+    // Stocker le token dans localStorage
+    localStorage.setItem("jwtToken", token);
 
     return token;
   } catch (error: any) {
@@ -26,6 +26,30 @@ export async function login(email: string, password: string): Promise<string> {
     );
   }
 }
+
 export function getToken(): string | null {
   return localStorage.getItem("jwtToken");
+}
+
+/**
+ * Déconnecte côté client et serveur
+ */
+export async function logout(): Promise<void> {
+  const token = getToken();
+
+  try {
+    if (token) {
+      // Appel API logout si le backend gère ça
+      await axios.post(
+        `${API_BASE_URL}/auth/logout`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    }
+  } catch (error) {
+    console.warn("Erreur côté serveur lors du logout :", error);
+    // même si erreur côté serveur, on supprime le token local
+  } finally {
+    localStorage.removeItem("jwtToken");
+  }
 }

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -63,7 +63,7 @@ export default function App() {
           <Route path="formation" element={<Formation />} />
           <Route path="ajouterFormation" element={<AjouterFormation />} />
           <Route path="formationDetails/:id" element={<FormationDetails />} />
-          <Route path="FichePresence/:id" element={<FichePresence />} />
+          <Route path="fichePresence/:id" element={<FichePresence />} />
           <Route path="listePresence/:id" element={<FichePresenceReadOnly />} />
           <Route path="ajouterService" element={<AjouterService />} />
           <Route path="services" element={<Service />} />
@@ -80,11 +80,12 @@ export default function App() {
           <Route path="videos" element={<Videos />} />
           <Route path="line-chart" element={<LineChart />} />
           <Route path="bar-chart" element={<BarChart />} />
-          <Route path="/statistiqueformation/:formationId" element={<Example/>} />
+          <Route path="statistiqueformation/:formationId" element={<Example />} />
         </Route>
 
         {/* Routes sans Dashboard / sidebar */}
         <Route path="/evaluationformationachaud/:formationId" element={<PageAvecQcm />} />
+
         {/* Fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>

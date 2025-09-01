@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { logout } from "../api/loginService";
 import {
   CalenderIcon,
   ChevronDownIcon,
@@ -10,7 +11,6 @@ import {
   PlugInIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import SidebarWidget from "./SidebarWidget";
 
 type SubItem = {
   name: string;
@@ -24,46 +24,12 @@ type NavItem = {
   icon: React.ReactNode;
   path?: string;
   subItems?: SubItem[];
-  onClick?: () => void; // pour logout
 };
-
-// Menu principal traduit en français
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Tableau de bord",
-    subItems: [{ name: "Accueil", path: "/", pro: false }],
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Employés",
-    subItems: [{ name: "Liste des employés", path: "/employees", pro: false }],
-  },
-  {
-    icon: <FormationIcon />,
-    name: "Formations",
-    subItems: [{ name: "Liste des formations", path: "/formation", pro: false }],
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Services",
-    subItems: [{ name: "Liste des services", path: "/services", pro: false }],
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendrier",
-    path: "/calendar",
-  },
-  {
-    icon: <PlugInIcon />,
-    name: "Déconnexion",
-    path: "/signin",
-  },
-];
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [openSubmenu, setOpenSubmenu] = useState<{ type: "main"; index: number } | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
@@ -76,6 +42,35 @@ const AppSidebar: React.FC = () => {
 
   const isVisible = isExpanded || isHovered || isMobileOpen;
 
+  const navItems = useMemo<NavItem[]>(() => [
+    {
+      icon: <GridIcon />,
+      name: "Tableau de bord",
+      subItems: [{ name: "Accueil", path: "/" }],
+    },
+    {
+      icon: <UserCircleIcon />,
+      name: "Employés",
+      subItems: [{ name: "Liste des employés", path: "/employees" }],
+    },
+    {
+      icon: <FormationIcon />,
+      name: "Formations",
+      subItems: [{ name: "Liste des formations", path: "/formation" }],
+    },
+    {
+      icon: <CalenderIcon />,
+      name: "Services",
+      subItems: [{ name: "Liste des services", path: "/services" }],
+    },
+    {
+      icon: <CalenderIcon />,
+      name: "Calendrier",
+      path: "/calendar",
+    },
+  ], []);
+
+  // Gestion de l'ouverture automatique du sous-menu actif
   useEffect(() => {
     let submenuMatched = false;
     navItems.forEach((nav, index) => {
@@ -87,7 +82,7 @@ const AppSidebar: React.FC = () => {
       });
     });
     if (!submenuMatched) setOpenSubmenu(null);
-  }, [location, isActive]);
+  }, [location.pathname, navItems, isActive]);
 
   useEffect(() => {
     if (openSubmenu !== null) {
@@ -132,17 +127,6 @@ const AppSidebar: React.FC = () => {
                 />
               )}
             </button>
-          ) : nav.onClick ? (
-            // Logout item
-            <button
-              onClick={nav.onClick}
-              className={`menu-item group cursor-pointer ${
-                !isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
-              }`}
-            >
-              <span className="menu-item-icon-size menu-item-icon-inactive">{nav.icon}</span>
-              {isVisible && <span className="menu-item-text">{nav.name}</span>}
-            </button>
           ) : (
             nav.path && (
               <Link
@@ -181,30 +165,6 @@ const AppSidebar: React.FC = () => {
                       }`}
                     >
                       {subItem.name}
-                      <span className="flex items-center gap-1 ml-auto">
-                        {subItem.new && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge`}
-                          >
-                            Nouveau
-                          </span>
-                        )}
-                        {subItem.pro && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge`}
-                          >
-                            Pro
-                          </span>
-                        )}
-                      </span>
                     </Link>
                   </li>
                 ))}
@@ -263,6 +223,20 @@ const AppSidebar: React.FC = () => {
           </h2>
           {renderMenuItems(navItems)}
         </nav>
+
+        {/* Bouton Déconnexion en bas */}
+        <div className="mt-auto mb-6">
+          <button
+            onClick={async () => {
+              await logout();
+              navigate("/signin");
+            }}
+            className="flex items-center gap-3 w-full px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg"
+          >
+            <PlugInIcon className="w-5 h-5" />
+            {isVisible && <span>Déconnexion</span>}
+          </button>
+        </div>
       </div>
     </aside>
   );

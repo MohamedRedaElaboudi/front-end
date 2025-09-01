@@ -25,9 +25,9 @@ export default function AuthLayout({
                   alt="Logo"
                 />
               </Link>
-              <p className="text-center text-gray-400 dark:text-white/60">
-               Text text text text text
-              </p>
+             <p className="text-center text-gray-400 dark:text-white/60">
+  Connectez-vous et simplifiez votre gestion quotidienne !
+</p>
             </div>
           </div>
         </div>
