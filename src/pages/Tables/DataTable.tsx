@@ -1,4 +1,4 @@
-import  { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/Table';
 import Button from './ui/Button';
 import Select from './ui/Select';
@@ -72,17 +72,18 @@ const DataTable = () => {
   };
 
   return (
-    <div className="bg-white transition-colors duration-200">
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="bg-white dark:bg-gray-800 transition-colors duration-200">
+      <div className="bg-white dark:bg-gray-700 rounded-xl shadow-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+        {/* Filtrage et recherche */}
+        <div className="p-6 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Afficher</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">Afficher</span>
             <Select
               value={entriesPerPage}
               onChange={setEntriesPerPage}
               options={entriesOptions}
             />
-            <span className="text-sm text-gray-600">entrées</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">entrées</span>
           </div>
           <SearchInput
             value={searchTerm}
@@ -92,15 +93,16 @@ const DataTable = () => {
           />
         </div>
 
-        <div className="overflow-x-auto bg-white">
+        {/* Tableau */}
+        <div className="overflow-x-auto bg-white dark:bg-gray-700">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-gray-200">
+              <TableRow className="border-b border-gray-200 dark:border-gray-600">
                 {["Nom complet", "CIN", "Email", "Fonction", "Service", "Date recrutement", "Actions"].map((col, i) => (
                   <TableCell
                     isHeader
                     key={i}
-                    className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                   >
                     {col}
                   </TableCell>
@@ -111,30 +113,30 @@ const DataTable = () => {
             <TableBody>
               {currentData.length === 0 ? (
                 <TableRow>
-                  <TableCell  className="text-center py-4 text-gray-500">
+                  <TableCell className="text-center py-4 text-gray-500 dark:text-gray-400">
                     Aucun employé trouvé.
                   </TableCell>
                 </TableRow>
               ) : currentData.map(emp => (
                 <TableRow
                   key={emp.id}
-                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                  className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                 >
-                  <TableCell className="px-6 py-4 text-sm font-medium text-gray-900">
+                  <TableCell className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                     {emp.nom} {emp.prenom}
                   </TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-gray-600">{emp.cne}</TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-gray-600">{emp.email}</TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-gray-600">{emp.fonction ?? '-'}</TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-blue-600">{emp.service?.nom ?? '-'}</TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-gray-600">{emp.dateRecrutement}</TableCell>
+                  <TableCell className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{emp.cne}</TableCell>
+                  <TableCell className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{emp.email}</TableCell>
+                  <TableCell className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{emp.fonction ?? '-'}</TableCell>
+                  <TableCell className="px-6 py-4 text-sm text-blue-600 dark:text-blue-400">{emp.service?.nom ?? '-'}</TableCell>
+                  <TableCell className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{emp.dateRecrutement}</TableCell>
                   <TableCell className="px-6 py-4 text-sm">
                     <div className="flex gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(emp.id)}
-                        className="p-1 text-red-600 hover:bg-red-50"
+                        className="p-1 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-800"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -142,7 +144,7 @@ const DataTable = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEdit(emp.id)}
-                        className="p-1 text-blue-600 hover:bg-blue-50"
+                        className="p-1 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-800"
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -154,7 +156,8 @@ const DataTable = () => {
           </Table>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-200">
+        {/* Pagination */}
+        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-600">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
