@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/Table";
+
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/table/index";
 import Select from "./ui/Select";
 import SearchInput from "./ui/SearchInput";
 import Pagination from "./ui/Pagination";
