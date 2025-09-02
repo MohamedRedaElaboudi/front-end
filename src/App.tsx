@@ -85,6 +85,7 @@ export default function App() {
 
         {/* Routes sans Dashboard / sidebar */}
         <Route path="/evaluationformationachaud/:formationId" element={<PageAvecQcm />} />
+        <Route path="/test/:formationId" element={<PageAvecQcm />} />
 
         {/* Fallback */}
         <Route path="*" element={<NotFound />} />
