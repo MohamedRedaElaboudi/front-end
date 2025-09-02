@@ -7,7 +7,7 @@ import Label from "../form/Label";
 import {
   getFormationById,
   updateFormation,
-  getAllFormateurs, // On récupère tous les formateurs
+  getAllFormateurs,
 } from "../../api/formationService";
 import { FormulairesService } from "../../api/formulaireService";
 import ParticipantsTable from "../../pages/Tables/ParticipantsTablefold/ParticipantsTable";
@@ -24,13 +24,10 @@ export default function FormationCard({ formationId }: { formationId: number }) 
 
   const [isParticipantModalOpen, setIsParticipantModalOpen] = useState(false);
   const [selectedParticipantIds, setSelectedParticipantIds] = useState<number[]>([]);
-
   const [editedFormation, setEditedFormation] = useState<any>({});
 
-  const openModal = () => {
-    setEditedFormation({ ...formation });
-    setIsOpen(true);
-  };
+  // Ouvrir / fermer modals
+  const openModal = () => { setEditedFormation({ ...formation }); setIsOpen(true); };
   const closeModal = () => setIsOpen(false);
   const openParticipantModal = () => setIsParticipantModalOpen(true);
   const closeParticipantModal = () => setIsParticipantModalOpen(false);
@@ -41,7 +38,7 @@ export default function FormationCard({ formationId }: { formationId: number }) 
         const [formationData, formulaireData, formateursData] = await Promise.all([
           getFormationById(formationId),
           FormulairesService.getByFormationId(formationId),
-          getAllFormateurs(), // récupérer tous les formateurs
+          getAllFormateurs(),
         ]);
 
         setFormation(formationData);
@@ -56,10 +53,7 @@ export default function FormationCard({ formationId }: { formationId: number }) 
 
   const handleSave = async () => {
     try {
-      const payload = {
-        ...editedFormation,
-      };
-      const updated = await updateFormation(formationId, payload);
+      const updated = await updateFormation(formationId, editedFormation);
       setFormation(updated);
       closeModal();
       alert("Formation mise à jour avec succès !");
@@ -77,10 +71,7 @@ export default function FormationCard({ formationId }: { formationId: number }) 
       }
       await Promise.all(
         selectedParticipantIds.map((participantId) =>
-          ajouterParticipation({
-            employe: { id: participantId },
-            formation: { id: formationId },
-          })
+          ajouterParticipation({ employe: { id: participantId }, formation: { id: formationId } })
         )
       );
       alert("Participants ajoutés avec succès !");
@@ -115,9 +106,7 @@ export default function FormationCard({ formationId }: { formationId: number }) 
           </h4>
 
           <div className="flex flex-wrap gap-2">
-            {(statut === "en_cours_de_validation" ||
-              statut === "non_valide" ||
-              statut === "valide") && (
+            {(statut === "en_cours_de_validation" || statut === "non_valide" || statut === "valide") && (
               <Button onClick={openModal} className="bg-blue-600 hover:bg-blue-700">
                 Modifier
               </Button>
@@ -145,7 +134,7 @@ export default function FormationCard({ formationId }: { formationId: number }) 
             {statut === "termine" && (
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
                 <Button
-                  onClick={() => navigate(`/FichePresence/${formationId}`)}
+                  onClick={() => navigate(`/listePresence/${formationId}`)}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
                   Voir la liste de présence
@@ -176,42 +165,36 @@ export default function FormationCard({ formationId }: { formationId: number }) 
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                 {label}
               </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {value}
-              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">{value}</p>
             </div>
           ))}
         </div>
 
-        {/* Formulaire avant participants */}
+        {/* Formulaire formation si terminé */}
         {statut === "termine" && formulaire && (
-          <div className="flex flex-col md:flex-row md:items-center gap-2">
-            <Label>Formulaire de la formation :</Label>
+          <div className="flex flex-col md:flex-row md:items-center gap-3 p-4 mb-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <Label className="min-w-[150px]">Formulaire de la formation :</Label>
             <Input
               type="text"
               value={`${window.location.origin}/evaluationformationachaud/${formationId}`}
               disabled
-              className="flex-1"
+              className="flex-1 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2"
             />
             <Button
+              size="sm"
+              variant="outline"
+              className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
               onClick={() => {
-                navigator.clipboard.writeText(
-                  `${window.location.origin}/evaluationformationachaud/${formationId}`
-                );
+                navigator.clipboard.writeText(`${window.location.origin}/evaluationformationachaud/${formationId}`);
                 alert("Lien copié !");
               }}
-              className="bg-gray-500 hover:bg-gray-600"
             >
               Copier
             </Button>
             <Button
-              onClick={() =>
-                window.open(
-                  `${window.location.origin}/evaluationformationachaud/${formationId}`,
-                  "_blank"
-                )
-              }
+              size="sm"
               className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => window.open(`${window.location.origin}/evaluationformationachaud/${formationId}`, "_blank")}
             >
               Ouvrir
             </Button>
@@ -219,8 +202,8 @@ export default function FormationCard({ formationId }: { formationId: number }) 
         )}
 
         {/* Ajouter Participants */}
-        {statut === "en_cours_de_validation" && (
-          <Button onClick={openParticipantModal} className="bg-green-600 hover:bg-green-700">
+        {(statut === "valide" || statut === "en_cours_de_validation" || statut === "non_valide") && (
+          <Button onClick={openParticipantModal} className="bg-green-600 hover:bg-green-700 mb-4">
             Ajouter Participants
           </Button>
         )}
@@ -244,63 +227,45 @@ export default function FormationCard({ formationId }: { formationId: number }) 
 
           <form
             className="grid grid-cols-1 gap-4 lg:grid-cols-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSave();
-            }}
+            onSubmit={(e) => { e.preventDefault(); handleSave(); }}
           >
             <div>
               <Label>Thème</Label>
               <Input
                 value={editedFormation.theme || ""}
-                onChange={(e) =>
-                  setEditedFormation({ ...editedFormation, theme: e.target.value })
-                }
+                onChange={(e) => setEditedFormation({ ...editedFormation, theme: e.target.value })}
               />
             </div>
-
             <div>
               <Label>Lieu</Label>
               <Input
                 value={editedFormation.lieu || ""}
-                onChange={(e) =>
-                  setEditedFormation({ ...editedFormation, lieu: e.target.value })
-                }
+                onChange={(e) => setEditedFormation({ ...editedFormation, lieu: e.target.value })}
               />
             </div>
-
             <div>
               <Label>Type</Label>
               <Input
                 value={editedFormation.type || ""}
-                onChange={(e) =>
-                  setEditedFormation({ ...editedFormation, type: e.target.value })
-                }
+                onChange={(e) => setEditedFormation({ ...editedFormation, type: e.target.value })}
               />
             </div>
-
             <div>
               <Label>Date début</Label>
               <Input
                 type="date"
                 value={editedFormation.dateDebut?.split("T")[0] || ""}
-                onChange={(e) =>
-                  setEditedFormation({ ...editedFormation, dateDebut: e.target.value })
-                }
+                onChange={(e) => setEditedFormation({ ...editedFormation, dateDebut: e.target.value })}
               />
             </div>
-
             <div>
               <Label>Date fin</Label>
               <Input
                 type="date"
                 value={editedFormation.dateFin?.split("T")[0] || ""}
-                onChange={(e) =>
-                  setEditedFormation({ ...editedFormation, dateFin: e.target.value })
-                }
+                onChange={(e) => setEditedFormation({ ...editedFormation, dateFin: e.target.value })}
               />
             </div>
-
             <div>
               <Label>Formateur</Label>
               <select
@@ -315,22 +280,17 @@ export default function FormationCard({ formationId }: { formationId: number }) 
               >
                 <option value="">-- Sélectionner un formateur --</option>
                 {formateurs.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.nomFormateur}
-                  </option>
+                  <option key={f.id} value={f.id}>{f.nomFormateur}</option>
                 ))}
               </select>
             </div>
-
             <div>
               <Label>Statut</Label>
               <Input value={editedFormation.statut || ""} disabled />
             </div>
 
             <div className="flex items-center gap-3 mt-4 lg:col-span-2 justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
-                Annuler
-              </Button>
+              <Button size="sm" variant="outline" onClick={closeModal}>Annuler</Button>
               <Button size="sm">Enregistrer</Button>
             </div>
           </form>
@@ -341,20 +301,33 @@ export default function FormationCard({ formationId }: { formationId: number }) 
       <Modal
         isOpen={isParticipantModalOpen}
         onClose={closeParticipantModal}
-        className="max-w-[900px] m-2"
+        className="max-w-[70%] min-h-[70%] m-auto p-0"
       >
-        <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl max-h-[500px] overflow-y-auto">
-          <h3 className="text-xl font-semibold mb-3 text-gray-800 dark:text-white">
-            Sélectionner les participants
-          </h3>
+        <div className="flex flex-col bg-white dark:bg-gray-900 rounded-3xl shadow-xl overflow-hidden max-h-[80vh]">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-2xl font-semibold text-gray-800 dark:text-white">
+              Sélectionner les participants
+            </h3>
+            <button
+              onClick={closeParticipantModal}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            >
+              ✕
+            </button>
+          </div>
 
-          <SelectDataTable onSelectionChange={setSelectedParticipantIds} />
+          {/* Contenu */}
+          <div className="p-6 flex-1 overflow-y-auto">
+            <SelectDataTable onSelectionChange={setSelectedParticipantIds} />
+          </div>
 
-          <div className="flex justify-end gap-3 mt-4">
+          {/* Footer */}
+          <div className="flex justify-end gap-4 p-6 border-t border-gray-200 dark:border-gray-700">
             <Button size="sm" variant="outline" onClick={closeParticipantModal}>
               Annuler
             </Button>
-            <Button size="sm" onClick={handleSaveParticipants}>
+            <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleSaveParticipants}>
               Enregistrer
             </Button>
           </div>
