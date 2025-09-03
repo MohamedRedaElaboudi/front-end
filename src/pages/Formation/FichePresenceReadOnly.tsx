@@ -68,7 +68,8 @@ const FichePresenceReadOnly = () => {
       const formatted: Participant[] = participants.map((p: any) => {
         const presence: { [date: string]: boolean } = {};
         presenceDates.forEach(date => {
-          presence[date] = presenceMap[`${p.employe.id}-${date}`] ?? true;
+          // ⚠️ Correction ici : absent par défaut
+          presence[date] = presenceMap[`${p.employe.id}-${date}`] ?? false;
         });
         return {
           id: p.employe.id,
