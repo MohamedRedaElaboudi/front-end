@@ -90,7 +90,7 @@ const EmployeeForm = forwardRef<EmployeeFormHandles>((_props, ref) => {
 
     const payload = {
       id: 0,
-      cni: formData.cni,
+      cne: formData.cni,
       nom: formData.nom,
       prenom: formData.prenom,
       email: formData.email,
