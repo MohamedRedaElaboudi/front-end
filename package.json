@@ -34,6 +34,7 @@
     "jspdf": "^3.0.2",
     "lucide-react": "^0.536.0",
     "material-react-table": "^3.2.1",
+    "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",
     "react-dnd": "^16.0.1",

@@ -13,6 +13,7 @@ import { FormulairesService } from "../../api/formulaireService";
 import ParticipantsTable from "../../pages/Tables/ParticipantsTablefold/ParticipantsTable";
 import SelectDataTable from "../../pages/Tables/SelctDataTable";
 import { ajouterParticipation } from "../../api/participationService";
+import { QRCodeCanvas } from "qrcode.react"; // ✅ Ajout QR Code
 
 export default function FormationCard({ formationId }: { formationId: number }) {
   const navigate = useNavigate();
@@ -171,35 +172,61 @@ export default function FormationCard({ formationId }: { formationId: number }) 
         </div>
 
         {/* Formulaire formation si terminé */}
-        {statut === "termine" && formulaire && (
-          <div className="flex flex-col md:flex-row md:items-center gap-3 p-4 mb-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <Label className="min-w-[150px]">Formulaire de la formation :</Label>
-            <Input
-              type="text"
-              value={`${window.location.origin}/evaluationformationachaud/${formationId}`}
-              disabled
-              className="flex-1 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2"
-            />
-            <Button
-              size="sm"
-              variant="outline"
-              className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
-              onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/evaluationformationachaud/${formationId}`);
-                alert("Lien copié !");
-              }}
-            >
-              Copier
-            </Button>
-            <Button
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => window.open(`${window.location.origin}/evaluationformationachaud/${formationId}`, "_blank")}
-            >
-              Ouvrir
-            </Button>
-          </div>
-        )}
+       {statut === "termine" && formulaire && (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 mb-4 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+    {/* Bloc lien + boutons */}
+    <div className="flex flex-col gap-3">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
+        Formulaire de la formation
+      </h3>
+
+      <Input
+        type="text"
+        value={`${window.location.origin}/evaluationformationachaud/${formationId}`}
+        disabled
+        className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 text-sm"
+      />
+
+      <div className="flex gap-3">
+        <Button
+          size="sm"
+          variant="outline"
+          className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl shadow-sm"
+          onClick={() => {
+            navigator.clipboard.writeText(`${window.location.origin}/evaluationformationachaud/${formationId}`);
+          }}
+        >
+          Copier
+        </Button>
+
+        <Button
+          size="sm"
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm"
+          onClick={() =>
+            window.open(`${window.location.origin}/evaluationformationachaud/${formationId}`, "_blank")
+          }
+        >
+          Ouvrir
+        </Button>
+      </div>
+    </div>
+
+    {/* Bloc QR Code */}
+    <div className="flex flex-col items-center justify-center">
+      <QRCodeCanvas
+        value={`${window.location.origin}/evaluationformationachaud/${formationId}`}
+        size={200}
+        bgColor="#ffffff"
+        fgColor="#000000"
+        level="H"
+        includeMargin={true}
+      />
+      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+        Scanner le QR pour accéder
+      </p>
+    </div>
+  </div>
+)}
 
         {/* Ajouter Participants */}
         {(statut === "valide" || statut === "en_cours_de_validation" || statut === "non_valide") && (
