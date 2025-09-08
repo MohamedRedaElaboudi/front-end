@@ -46,7 +46,6 @@ export default function ModifierFormationModal({
   }, [isOpen, initialData]);
 
   const handleSave = () => {
-    // Validation simple
     if (!etablissement.trim() || !lieu.trim() || !diplome.trim() || !periode.trim()) {
       setError("Veuillez remplir tous les champs.");
       return;
@@ -66,14 +65,14 @@ export default function ModifierFormationModal({
         {error && <p className="mb-4 text-red-500">{error}</p>}
 
         <form
-          className="flex flex-col gap-5"
+          className="grid grid-cols-1 md:grid-cols-2 gap-5"
           onSubmit={(e) => {
             e.preventDefault();
             handleSave();
           }}
         >
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="flex flex-col">
+            <label className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               Établissement
             </label>
             <Input
@@ -83,8 +82,8 @@ export default function ModifierFormationModal({
             />
           </div>
 
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="flex flex-col">
+            <label className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               Lieu
             </label>
             <Input
@@ -94,8 +93,8 @@ export default function ModifierFormationModal({
             />
           </div>
 
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="flex flex-col">
+            <label className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               Diplôme obtenu
             </label>
             <Input
@@ -105,8 +104,8 @@ export default function ModifierFormationModal({
             />
           </div>
 
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="flex flex-col">
+            <label className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               Période
             </label>
             <Input
@@ -116,7 +115,7 @@ export default function ModifierFormationModal({
             />
           </div>
 
-          <div className="flex gap-3 justify-end mt-6">
+          <div className="flex gap-3 justify-end md:col-span-2 mt-6">
             <Button
               variant="outline"
               onClick={onClose}

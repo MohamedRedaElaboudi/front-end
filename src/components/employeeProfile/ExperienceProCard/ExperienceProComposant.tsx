@@ -46,19 +46,19 @@ export default function ExperienceProComposant({ experience, onUpdateList, onDel
   };
 
   return (
-    <div className="flex justify-between items-center border-b border-gray-200 py-3 px-2 hover:bg-gray-50 rounded-lg">
+    <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg">
       <div>
-        <p className="font-semibold text-gray-800">{experience.emploi_occupe}</p>
-        <p className="text-sm text-gray-600">
+        <p className="font-semibold text-gray-800 dark:text-gray-100">{experience.emploi_occupe}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           {experience.employeur} | {experience.date_debut} - {experience.date_fin}
         </p>
       </div>
       <div className="flex gap-3">
         <button onClick={handleEdit} className="p-1 rounded hover:bg-gray-200">
-          <PencilIcon className="w-5 h-5 text-blue-600" />
+          <PencilIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
         </button>
         <button onClick={handleDelete} className="p-1 rounded hover:bg-gray-200">
-          <TrashIcon className="w-5 h-5 text-red-600" />
+          <TrashIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
         </button>
       </div>
 
