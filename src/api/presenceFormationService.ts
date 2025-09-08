@@ -16,6 +16,21 @@ export interface PresenceFormation {
   datePresence: string;
 }
 
+export interface Presence {
+  datePresence: string;
+  statut: string;
+}
+
+export interface FormationParticipation {
+  formationId: number;
+  theme: string;
+  lieu: string;
+  type: string;
+  dateDebut: string;
+  dateFin: string;
+  presences: Presence[];
+}
+
 // --- Récupérer toutes les présences ---
 export async function getAllPresences(): Promise<PresenceFormation[]> {
   const response = await apiClient.get<PresenceFormation[]>(API_URL);
@@ -43,7 +58,7 @@ export async function getPresenceById(
       `${API_URL}/${employeId}/${formationId}/${datePresence}`
     );
     return response.data;
-  } catch (err) {
+  } catch {
     return null; // si aucune présence trouvée
   }
 }
@@ -55,5 +70,15 @@ export async function createPresence(
   const response = await apiClient.post<PresenceFormation>(API_URL, presence, {
     headers: { "Content-Type": "application/json" },
   });
+  return response.data;
+}
+
+// --- Récupérer les présences groupées par employé ---
+export async function getGroupedPresencesByEmploye(
+  employeId: number
+): Promise<FormationParticipation[]> {
+  const response = await apiClient.get<FormationParticipation[]>(
+    `${API_URL}/employe/${employeId}/grouped`
+  );
   return response.data;
 }
