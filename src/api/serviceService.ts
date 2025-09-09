@@ -6,6 +6,7 @@ const API_URL = `${API_BASE_URL}/services`;
 export interface Service {
   id: number;
   nom: string;
+  domaine: string;
   description: string;
 }
 

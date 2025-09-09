@@ -5,11 +5,12 @@ import Select from './ui/Select';
 import SearchInput from './ui/SearchInput';
 import Pagination from './ui/Pagination';
 import { Trash2, Edit } from 'lucide-react';
-import { useNavigate } from 'react-router';  // React Router DOM
-import { getAllServices, deleteService } from '../../api/serviceService'; // adapter selon ton API
+import { useNavigate } from 'react-router';
+import { getAllServices, deleteService } from '../../api/serviceService';
 
-const ServiceTable = () => {  const navigate = useNavigate();
-  const [serviceData, setServiceData] = useState<{id:number, nom:string, description:string}[]>([]);
+const ServiceTable = () => {
+  const navigate = useNavigate();
+  const [serviceData, setServiceData] = useState<{id:number, nom:string, description:string, domaine?:string}[]>([]);
   const [entriesPerPage, setEntriesPerPage] = useState('5');
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,7 +38,6 @@ const ServiceTable = () => {  const navigate = useNavigate();
     setCurrentPage(1);
   }, [searchTerm, entriesPerPage]);
 
-  // Filtrage par nom ou description
   const filteredData = useMemo(() => {
     const lower = searchTerm.toLowerCase();
     return serviceData.filter(s =>
@@ -65,7 +65,7 @@ const ServiceTable = () => {  const navigate = useNavigate();
   };
 
   const handleEdit = (id: number) => {
-    navigate(`/serviceDetails/${id}`); // adapter le chemin si besoin
+    navigate(`/serviceDetails/${id}`);
   };
 
   return (
@@ -108,7 +108,7 @@ const ServiceTable = () => {  const navigate = useNavigate();
             <TableBody>
               {currentData.length === 0 ? (
                 <TableRow>
-                  <TableCell  className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  <TableCell className="text-center py-4 text-gray-500 dark:text-gray-400" colSpan={3}>
                     Aucun service trouvé.
                   </TableCell>
                 </TableRow>
@@ -117,12 +117,15 @@ const ServiceTable = () => {  const navigate = useNavigate();
                   key={s.id}
                   className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                 >
+                  {/* Nom + Domaine */}
                   <TableCell className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                    {s.nom}
+                    {s.nom} - {s.domaine && s.domaine.trim() !== "" ? s.domaine : "Général"}
                   </TableCell>
+
                   <TableCell className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                     {s.description}
                   </TableCell>
+
                   <TableCell className="px-6 py-4 text-sm">
                     <div className="flex gap-2">
                       <Button

@@ -19,12 +19,17 @@ export default function AjouterFormation() {
     }
 
     try {
-      // Création du formateur
-      const formateur = await ajouterFormateur({
-        cneFormateur: formData.cneFormateur,
-        nomFormateur: formData.nomFormateur,
-        typeFormateur: formData.typeFormateur,
-      });
+      let formateurId = formData.formateur?.id;
+
+      // Création du formateur si nouveau
+      if (!formateurId) {
+        const formateur = await ajouterFormateur({
+          cneFormateur: formData.formateur.cneFormateur,
+          nomFormateur: formData.formateur.nomFormateur,
+          typeFormateur: formData.formateur.typeFormateur,
+        });
+        formateurId = formateur.id;
+      }
 
       // Création de la formation
       const formation = await ajouterFormation({
@@ -34,37 +39,33 @@ export default function AjouterFormation() {
         statut: formData.statut,
         dateDebut: formData.dateDebut,
         dateFin: formData.dateFin,
-        formateur: { id: formateur.id },
+        formateur: { id: formateurId },
+        service: { id: formData.service.id },
       });
 
-      // Ajout des participations
+      // Ajouter participations
       if (selectedPersonnesConcernees.length > 0) {
-        const promises = selectedPersonnesConcernees.map((participantId) =>
-          ajouterParticipation({
-            employe: { id: participantId },
-            formation: { id: formation.id },
-          })
+        await Promise.all(
+          selectedPersonnesConcernees.map((id) =>
+            ajouterParticipation({ employe: { id }, formation: { id: formation.id } })
+          )
         );
-        await Promise.all(promises);
       }
 
-      alert("Formation, formateur et participations ajoutés avec succès !");
+      alert("Formation ajoutée avec succès !");
       navigate("/formation");
     } catch (error) {
-      console.error("Erreur lors de l'ajout :", error);
-      alert("Erreur lors de l'ajout");
+      console.error(error);
+      alert("Erreur lors de l'ajout de la formation");
     }
   };
 
   return (
     <div className="min-h-screen p-6 bg-gray-50 dark:bg-gray-950">
       <PageMeta title="Ajouter Formation" description="Page d'ajout de formation" />
-
-      {/* Breadcrumb en haut de page */}
       <PageBreadcrumb pageTitle="Ajouter Formation" />
 
-      {/* Carte contenant le formulaire */}
-      <div className="max-w-4xl mx-auto mt-6 rounded-2xl border border-gray-200 bg-white  shadow-lg dark:border-gray-800 dark:bg-gray-900">
+      <div className="max-w-4xl mx-auto mt-6 rounded-2xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
         <FormationForm
           onDataChange={setFormData}
           onSelectedEmployeesChange={setSelectedPersonnesConcernees}

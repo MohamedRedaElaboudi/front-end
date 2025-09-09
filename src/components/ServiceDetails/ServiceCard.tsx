@@ -1,31 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Modal } from "../ui/modal";
+import { getServiceById, createService } from "../../api/serviceService";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
-import Label from "../form/Label";
-import { getServiceById, updateService } from "../../api/serviceService";
+import { X } from "lucide-react"; // icône croix pour supprimer
 
 export default function ServiceCard({ serviceId }: { serviceId: number }) {
-  const [isOpen, setIsOpen] = useState(false);
   const [service, setService] = useState<any>(null);
-  const [form, setForm] = useState({ nom: "", description: "" });
-  const [errors, setErrors] = useState<{ nom?: string; description?: string }>({});
-
-  const openModal = () => setIsOpen(true);
-  const closeModal = () => {
-    setErrors({});
-    setIsOpen(false);
-  };
+  const [newDomaines, setNewDomaines] = useState<string[]>([""]);
 
   useEffect(() => {
     async function fetchData() {
       try {
         const serviceData = await getServiceById(serviceId);
         setService(serviceData);
-        setForm({
-          nom: serviceData.nom,
-          description: serviceData.description,
-        });
       } catch (error) {
         console.error("Erreur chargement service", error);
       }
@@ -33,114 +20,101 @@ export default function ServiceCard({ serviceId }: { serviceId: number }) {
     fetchData();
   }, [serviceId]);
 
-  const handleChange = (field: string, value: any) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const handleAddDomaineInput = () => setNewDomaines([...newDomaines, ""]);
+
+  const handleNewDomaineChange = (index: number, value: string) => {
+    const updated = [...newDomaines];
+    updated[index] = value;
+    setNewDomaines(updated);
   };
 
-  // Validation simple
-  const validate = () => {
-    const newErrors: { nom?: string; description?: string } = {};
-    if (!form.nom.trim()) newErrors.nom = "Le nom est obligatoire.";
-    if (!form.description.trim()) newErrors.description = "La description est obligatoire.";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleRemoveDomaine = (index: number) => {
+    const updated = [...newDomaines];
+    updated.splice(index, 1);
+    setNewDomaines(updated.length ? updated : [""]); // toujours au moins un input vide
   };
 
-  const handleSave = async () => {
-    if (!validate()) return; // Stop si invalid
+  const handleCreateNewServices = async () => {
+    if (!service) return;
+    const domainesValides = newDomaines.filter(d => d.trim() !== "");
+    if (domainesValides.length === 0) {
+      alert("Veuillez saisir au moins un domaine.");
+      return;
+    }
 
     try {
-      const updated = await updateService(serviceId, {
-        nom: form.nom,
-        description: form.description,
-      });
-      setService(updated);
-      closeModal();
-      alert("Service mis à jour avec succès !");
-    } catch (error: any) {
-      console.error("Erreur sauvegarde service", error);
-      alert(`Erreur lors de la sauvegarde : ${error.message || error}`);
+      for (const domaine of domainesValides) {
+        await createService({
+          nom: service.nom,
+          description: service.description,
+          domaine: domaine,
+        });
+      }
+      alert("Nouveau(x) service(s) créé(s) avec succès !");
+      setNewDomaines([""]);
+    } catch (error) {
+      console.error("Erreur création service", error);
+      alert("Erreur lors de la création des services");
     }
   };
 
   if (!service) return <div>Chargement...</div>;
 
   return (
-    <>
-      {/* Carte service */}
-      <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-        <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-          {service.nom}
-        </h4>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-          <div>
-            <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">Nom</p>
-            <p className="text-sm font-medium text-gray-800 dark:text-white/90">{service.nom}</p>
-          </div>
-          <div className="md:col-span-2">
-            <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">Description</p>
-            <p className="text-sm font-medium text-gray-800 dark:text-white/90">{service.description}</p>
+    <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-700">
+      {/* Nom et description */}
+      <h3 className="text-xl font-semibold text-gray-800 dark:text-white">{service.nom}</h3>
+      <p className="text-gray-500 dark:text-gray-300 mb-4">{service.description}</p>
+
+      {/* Domaines existants */}
+      {service.domaine && (
+        <div className="mb-4">
+          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Domaines existants :</h4>
+          <div className="flex flex-wrap gap-2">
+            {service.domaine.split(",").map((d: string, index: number) => (
+              <span
+                key={index}
+                className="px-3 py-1 text-sm font-medium text-gray-800 bg-gray-200 rounded-full dark:bg-gray-700 dark:text-white"
+              >
+                {d.trim()}
+              </span>
+            ))}
           </div>
         </div>
+      )}
 
-        <button
-          onClick={openModal}
-          className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          Modifier
-        </button>
+      {/* Nouveaux domaines */}
+      <div>
+        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Ajouter de nouveaux domaines :</h4>
+        <div className="flex flex-col gap-2 mb-3">
+          {newDomaines.map((domaine, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <Input
+                type="text"
+                placeholder={`Nouveau domaine ${index + 1}`}
+                value={domaine}
+                onChange={(e) => handleNewDomaineChange(index, e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveDomaine(index)}
+                className="p-2 text-gray-500 hover:text-red-600"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={handleAddDomaineInput}>
+            + Ajouter un domaine
+          </Button>
+          <Button size="sm" onClick={handleCreateNewServices}>
+            Créer Services
+          </Button>
+        </div>
       </div>
-
-      {/* Modal modification */}
-      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[500px] m-4">
-        <div className="relative w-full p-4 overflow-y-auto bg-white rounded-3xl dark:bg-gray-900 lg:p-8">
-          <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-            Modifier le service
-          </h4>
-          <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-            Mettez à jour les informations du service.
-          </p>
-
-          <form
-            className="flex flex-col"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSave();
-            }}
-          >
-            <div className="grid grid-cols-1 gap-y-5">
-              <div>
-                <Label>Nom</Label>
-                <Input
-                  type="text"
-                  value={form.nom}
-                  onChange={(e) => handleChange("nom", e.target.value)}
-                />
-                {errors.nom && <p className="text-red-500 text-sm mt-1">{errors.nom}</p>}
-              </div>
-
-              <div>
-                <Label>Description</Label>
-                <Input
-                  type="text"
-                  value={form.description}
-                  onChange={(e) => handleChange("description", e.target.value)}
-                />
-                {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 mt-6 justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
-                Annuler
-              </Button>
-              <Button size="sm" type="submit">
-                Enregistrer
-              </Button>
-            </div>
-          </form>
-        </div>
-      </Modal>
-    </>
+    </div>
   );
 }

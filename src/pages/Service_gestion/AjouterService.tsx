@@ -19,6 +19,7 @@ export default function AjouterService() {
     try {
       await createService({
         nom: formData.nom,
+        domaine: "Général", 
         description: formData.description,
       });
 

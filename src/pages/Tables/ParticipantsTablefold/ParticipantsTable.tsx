@@ -1,5 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { getAllParticipants, deleteParticipation } from "../../../api/participationService";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../../pages/Tables/ui/Table";
+import Button from "../../../pages/Tables/ui/Button";
+import Select from "../../../pages/Tables/ui/Select";
+import SearchInput from "../../../pages/Tables/ui/SearchInput";
+import Pagination from "../../../pages/Tables/ui/Pagination";
+import { Trash2 } from "lucide-react";
 
 type Participant = {
   id_employe: number;
@@ -20,8 +26,15 @@ type ParticipantsTableProps = {
 const ParticipantsTable: React.FC<ParticipantsTableProps> = ({ id, statut }) => {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [entriesPerPage, setEntriesPerPage] = useState(5);
+  const [entriesPerPage, setEntriesPerPage] = useState("5");
   const [currentPage, setCurrentPage] = useState(1);
+
+  const entriesOptions = [
+    { value: "5", label: "5" },
+    { value: "10", label: "10" },
+    { value: "20", label: "20" },
+    { value: "50", label: "50" }
+  ];
 
   // Charger les participants
   useEffect(() => {
@@ -47,9 +60,7 @@ const ParticipantsTable: React.FC<ParticipantsTableProps> = ({ id, statut }) => 
   }, [id]);
 
   // Reset page si filtre change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, entriesPerPage]);
+  useEffect(() => setCurrentPage(1), [searchTerm, entriesPerPage]);
 
   // Supprimer un participant
   const handleDelete = async (employeId: number) => {
@@ -76,104 +87,84 @@ const ParticipantsTable: React.FC<ParticipantsTableProps> = ({ id, statut }) => 
     );
   }, [participants, searchTerm]);
 
-  const startIndex = (currentPage - 1) * entriesPerPage;
-  const currentData = filtered.slice(startIndex, startIndex + entriesPerPage);
-
+  const totalPages = Math.ceil(filtered.length / parseInt(entriesPerPage));
+  const startIndex = (currentPage - 1) * parseInt(entriesPerPage);
+  const currentData = filtered.slice(startIndex, startIndex + parseInt(entriesPerPage));
   const showActions = statut?.toLowerCase() !== "termine" && statut?.toLowerCase() !== "valide";
+  const showingText = `Affichage de ${startIndex + 1} à ${Math.min(startIndex + parseInt(entriesPerPage), filtered.length)} sur ${filtered.length} participant${filtered.length > 1 ? "s" : ""}`;
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-900 rounded shadow-md">
-      {/* Recherche et pagination */}
-      <div className="flex justify-between mb-2">
-        <input
-          type="text"
-          placeholder="Rechercher..."
-          className="border px-2 py-1 rounded"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <select
-          value={entriesPerPage}
-          onChange={(e) => setEntriesPerPage(Number(e.target.value))}
-          className="border px-2 py-1 rounded"
-        >
-          {[5, 10, 20, 50].map(n => (
-            <option key={n} value={n}>{n} par page</option>
-          ))}
-        </select>
+    <div className="bg-white dark:bg-gray-800 transition-colors duration-200 rounded-lg shadow-sm">
+      {/* Recherche et sélection */}
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Afficher</span>
+          <Select value={entriesPerPage} onChange={setEntriesPerPage} options={entriesOptions} />
+          <span className="text-sm text-gray-600 dark:text-gray-400">entrées</span>
+        </div>
+        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Recherche..." className="sm:w-80" />
       </div>
 
       {/* Table */}
-      <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-700">
-        <thead>
-          <tr className="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-            <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">Nom complet</th>
-            <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">CNE</th>
-            <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">Email</th>
-            <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">Fonction</th>
-            <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">Service</th>
-            <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">Date recrutement</th>
-            {showActions && (
-              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">Action</th>
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {currentData.length === 0 ? (
-            <tr>
-              <td colSpan={showActions ? 7 : 6} className="text-center py-4 text-gray-500 dark:text-gray-400">
-                Aucun participant trouvé.
-              </td>
-            </tr>
-          ) : (
-            currentData.map(p => (
-              <tr
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b border-gray-200 dark:border-gray-700">
+              {["Nom complet", "CNE", "Email", "Fonction", "Service", "Date recrutement", showActions ? "Actions" : ""].filter(Boolean).map((col, i) => (
+                <TableCell
+                  key={i}
+                  isHeader
+                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                >
+                  {col}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {currentData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={showActions ? 7 : 6} className="text-center py-6 text-gray-500 dark:text-gray-400">
+                  Aucun participant trouvé.
+                </TableCell>
+              </TableRow>
+            ) : currentData.map((p, index) => (
+              <TableRow
                 key={p.id_employe}
-                className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
+                className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${index % 2 === 0 ? "bg-white dark:bg-gray-800" : "bg-gray-50/50 dark:bg-gray-800/50"}`}
               >
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{p.nom} {p.prenom}</td>
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{p.cne}</td>
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{p.email}</td>
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{p.fonction ?? "-"}</td>
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{p.service?.nom ?? "-"}</td>
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{p.date_recrutement}</td>
+                <TableCell className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{p.nom} {p.prenom}</TableCell>
+                <TableCell className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{p.cne}</TableCell>
+                <TableCell className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{p.email}</TableCell>
+                <TableCell className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{p.fonction ?? "-"}</TableCell>
+                <TableCell className="px-6 py-4 text-sm text-blue-600 dark:text-blue-400">{p.service?.nom ?? "-"}</TableCell>
+                <TableCell className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{p.date_recrutement}</TableCell>
                 {showActions && (
-                  <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
-                    <button
+                  <TableCell className="px-6 py-4 text-sm">
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleDelete(p.id_employe)}
-                      className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                      className="p-1 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                     >
-                      Supprimer
-                    </button>
-                  </td>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </TableCell>
                 )}
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
-      {/* Pagination basique */}
-      <div className="flex justify-between mt-2 items-center text-sm text-gray-600 dark:text-gray-400">
-        <div>
-          {filtered.length} participant{filtered.length > 1 ? "s" : ""}
-        </div>
-        <div className="flex gap-2">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            className="px-2 py-1 border rounded disabled:opacity-50"
-          >
-            Précédent
-          </button>
-          <button
-            disabled={startIndex + entriesPerPage >= filtered.length}
-            onClick={() => setCurrentPage(prev => prev + 1)}
-            className="px-2 py-1 border rounded disabled:opacity-50"
-          >
-            Suivant
-          </button>
-        </div>
+      {/* Pagination */}
+      <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          showingText={showingText}
+        />
       </div>
     </div>
   );
