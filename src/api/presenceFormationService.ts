@@ -82,3 +82,18 @@ export async function getGroupedPresencesByEmploye(
   );
   return response.data;
 }
+export async function autoMarkPresences(payload: {
+  formationId: number;
+  datePresence: string;
+  employeIds: number[];
+}): Promise<any> {
+  try {
+    const response = await apiClient.post(`${API_URL}/auto-mark`, payload, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+  } catch (err) {
+    console.error("Erreur auto-mark présences:", err);
+    throw err;
+  }
+}

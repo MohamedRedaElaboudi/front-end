@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
@@ -13,7 +13,7 @@ import { FormulairesService } from "../../api/formulaireService";
 import ParticipantsTable from "../../pages/Tables/ParticipantsTablefold/ParticipantsTable";
 import SelectDataTable from "../../pages/Tables/SelctDataTable";
 import { ajouterParticipation } from "../../api/participationService";
-import { QRCodeCanvas } from "qrcode.react"; // ✅ Ajout QR Code
+import { QRCodeCanvas } from "qrcode.react";
 
 export default function FormationCard({ formationId }: { formationId: number }) {
   const navigate = useNavigate();
@@ -76,6 +76,7 @@ export default function FormationCard({ formationId }: { formationId: number }) 
         )
       );
       alert("Participants ajoutés avec succès !");
+      setSelectedParticipantIds([]);
       closeParticipantModal();
     } catch (error) {
       console.error("Erreur lors de l'enregistrement des participants", error);
@@ -171,62 +172,56 @@ export default function FormationCard({ formationId }: { formationId: number }) 
           ))}
         </div>
 
-        {/* Formulaire formation si terminé */}
-       {statut === "termine" && formulaire && (
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 mb-4 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-    {/* Bloc lien + boutons */}
-    <div className="flex flex-col gap-3">
-      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
-        Formulaire de la formation
-      </h3>
-
-      <Input
-        type="text"
-        value={`${window.location.origin}/evaluationformationachaud/${formationId}`}
-        disabled
-        className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 text-sm"
-      />
-
-      <div className="flex gap-3">
-        <Button
-          size="sm"
-          variant="outline"
-          className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl shadow-sm"
-          onClick={() => {
-            navigator.clipboard.writeText(`${window.location.origin}/evaluationformationachaud/${formationId}`);
-          }}
-        >
-          Copier
-        </Button>
-
-        <Button
-          size="sm"
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm"
-          onClick={() =>
-            window.open(`${window.location.origin}/evaluationformationachaud/${formationId}`, "_blank")
-          }
-        >
-          Ouvrir
-        </Button>
-      </div>
-    </div>
-
-    {/* Bloc QR Code */}
-    <div className="flex flex-col items-center justify-center">
-      <QRCodeCanvas
-        value={`${window.location.origin}/evaluationformationachaud/${formationId}`}
-        size={200}
-        bgColor="#ffffff"
-        fgColor="#000000"
-        level="H"
-        includeMargin={true}
-      />
-      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-        Scanner le QR pour accéder
-      </p>
-    </div>
-  </div>
-)}
+        {/* Formulaire + QR code si terminé */}
+        {statut === "termine" && formulaire && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 mb-4 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col gap-3">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                Formulaire de la formation
+              </h3>
+              <Input
+                type="text"
+                value={`${window.location.origin}/evaluationformationachaud/${formationId}`}
+                disabled
+                className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2 text-sm"
+              />
+              <div className="flex gap-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl shadow-sm"
+                  onClick={() =>
+                    navigator.clipboard.writeText(`${window.location.origin}/evaluationformationachaud/${formationId}`)
+                  }
+                >
+                  Copier
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm"
+                  onClick={() =>
+                    window.open(`${window.location.origin}/evaluationformationachaud/${formationId}`, "_blank")
+                  }
+                >
+                  Ouvrir
+                </Button>
+              </div>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <QRCodeCanvas
+                value={`${window.location.origin}/evaluationformationachaud/${formationId}`}
+                size={200}
+                bgColor="#ffffff"
+                fgColor="#000000"
+                level="H"
+                includeMargin={true}
+              />
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Scanner le QR pour accéder
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Ajouter Participants */}
         {(statut === "valide" || statut === "en_cours_de_validation" || statut === "non_valide") && (
@@ -295,21 +290,26 @@ export default function FormationCard({ formationId }: { formationId: number }) 
             </div>
             <div>
               <Label>Formateur</Label>
-              <select
-                value={editedFormation.formateur?.id || ""}
-                onChange={(e) =>
-                  setEditedFormation({
-                    ...editedFormation,
-                    formateur: formateurs.find((f) => f.id === parseInt(e.target.value)),
-                  })
-                }
-                className="w-full p-2 border rounded-lg"
-              >
-                <option value="">-- Sélectionner un formateur --</option>
-                {formateurs.map((f) => (
-                  <option key={f.id} value={f.id}>{f.nomFormateur}</option>
-                ))}
-              </select>
+<select
+  value={editedFormation.formateur?.id?.toString() || ""}
+  onChange={(e) => {
+    const selectedId = parseInt(e.target.value);
+    const selectedFormateur = formateurs.find((f) => f.id === selectedId) || null;
+    setEditedFormation({
+      ...editedFormation,
+      formateur: selectedFormateur,
+    });
+  }}
+  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+>
+  <option value="">-- Sélectionner un formateur --</option>
+  {formateurs.map((f) => (
+    <option key={f.id} value={f.id.toString()}>
+      {f.nomFormateur}
+    </option>
+  ))}
+</select>
+
             </div>
             <div>
               <Label>Statut</Label>
@@ -336,17 +336,15 @@ export default function FormationCard({ formationId }: { formationId: number }) 
             <h3 className="text-2xl font-semibold text-gray-800 dark:text-white">
               Sélectionner les participants
             </h3>
-            <button
-              onClick={closeParticipantModal}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-            >
-              ✕
-            </button>
+            <button onClick={closeParticipantModal}>✕</button>
           </div>
 
           {/* Contenu */}
           <div className="p-6 flex-1 overflow-y-auto">
-            <SelectDataTable onSelectionChange={setSelectedParticipantIds} />
+            <SelectDataTable
+              selected={[]}
+              onSelectionChange={(selected) => setSelectedParticipantIds(selected.map(emp => emp.id))}
+            />
           </div>
 
           {/* Footer */}
@@ -354,7 +352,11 @@ export default function FormationCard({ formationId }: { formationId: number }) 
             <Button size="sm" variant="outline" onClick={closeParticipantModal}>
               Annuler
             </Button>
-            <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleSaveParticipants}>
+            <Button
+              size="sm"
+              className="bg-green-600 hover:bg-green-700"
+              onClick={handleSaveParticipants}
+            >
               Enregistrer
             </Button>
           </div>

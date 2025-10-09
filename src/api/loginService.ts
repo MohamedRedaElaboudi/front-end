@@ -6,11 +6,11 @@ interface LoginResponse {
   token: string;
 }
 
-export async function login(email: string, password: string): Promise<string> {
+export async function login(email: string, motDePasse: string): Promise<string> {
   try {
     const response = await axios.post<LoginResponse>(
       `${API_BASE_URL}/auth/login`,
-      { email, password },
+      { email, motDePasse },
       { headers: { "Content-Type": "application/json" } }
     );
 

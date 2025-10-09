@@ -70,7 +70,6 @@ const AppSidebar: React.FC = () => {
     },
   ], []);
 
-  // Gestion de l'ouverture automatique du sous-menu actif
   useEffect(() => {
     let submenuMatched = false;
     navItems.forEach((nav, index) => {
@@ -101,7 +100,7 @@ const AppSidebar: React.FC = () => {
   };
 
   const renderMenuItems = (items: NavItem[]) => (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col gap-1 sm:gap-2">
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
@@ -109,7 +108,7 @@ const AppSidebar: React.FC = () => {
               onClick={() => handleSubmenuToggle(index)}
               className={`menu-item group ${
                 openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"
-              } cursor-pointer ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
+              } cursor-pointer ${!isVisible ? "sm:justify-center" : "sm:justify-start"}`}
             >
               <span
                 className={`menu-item-icon-size ${
@@ -121,7 +120,7 @@ const AppSidebar: React.FC = () => {
               {isVisible && <span className="menu-item-text">{nav.name}</span>}
               {isVisible && (
                 <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                  className={`ml-auto w-4 sm:w-5 h-4 sm:h-5 transition-transform duration-200 ${
                     openSubmenu?.index === index ? "rotate-180 text-brand-500" : ""
                   }`}
                 />
@@ -131,7 +130,9 @@ const AppSidebar: React.FC = () => {
             nav.path && (
               <Link
                 to={nav.path}
-                className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"}`}
+                className={`menu-item group ${
+                  isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                } ${!isVisible ? "sm:justify-center" : "sm:justify-start"}`}
               >
                 <span
                   className={`menu-item-icon-size ${
@@ -153,7 +154,7 @@ const AppSidebar: React.FC = () => {
                 height: openSubmenu?.index === index ? `${subMenuHeight[`main-${index}`]}px` : "0px",
               }}
             >
-              <ul className="mt-2 space-y-1 ml-9">
+              <ul className="mt-1 sm:mt-2 space-y-1 ml-6 sm:ml-9">
                 {nav.subItems.map((subItem) => (
                   <li key={subItem.name}>
                     <Link
@@ -178,62 +179,66 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
-        ${isExpanded || isHovered ? "w-[290px]" : "w-[90px]"}
+      className={`fixed mt-14 sm:mt-16 md:mt-0 flex flex-col top-0 px-3 sm:px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 dark:text-gray-100 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+        ${isExpanded || isHovered ? "w-[240px] sm:w-[270px] md:w-[290px]" : "w-[70px] sm:w-[80px] md:w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0`}
+        sm:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex items-center justify-center mb-4">
-        <Link to="/">
-          {isVisible ? (
-            <div className="relative w-[500px] h-[150px]">
-              <img
-                className="absolute inset-0 w-full h-full object-contain dark:hidden"
-                src="/images/logo/logo.png"
-                alt="Logo clair"
-              />
-              <img
-                className="absolute inset-0 w-full h-full object-contain hidden dark:block"
-                src="/images/logo/logo.png"
-                alt="Logo sombre"
-              />
-            </div>
-          ) : (
-            <div className="relative w-[180px] h-[90px]">
-              <img
-                className="absolute inset-0 w-full h-full object-contain"
-                src="/images/logo/logo.png"
-                alt="Logo réduit"
-              />
-            </div>
-          )}
-        </Link>
+ <div className="flex items-center justify-center w-full border-b border-gray-200 dark:border-gray-800 py-1 sm:py-2">
+  <Link to="/" className="flex items-center transition-all duration-300">
+    {isVisible ? (
+      // Sidebar ouverte → afficher logo image plus grand
+      <img
+        src="../images/logo/logo.png" // remplacer par ton image/SVG
+        alt="Globex Instrumentation"
+        className="h-25 sm:h-25 w-50" // agrandi
+      />
+    ) : (
+      // Sidebar réduite → afficher G2I
+      <div
+        className={`w-15 h-15 sm:w-14 sm:h-14  rounded-full flex items-center justify-center flex-shrink-0
+                    transition-transform duration-300 transform hover:scale-105`}
+      >
+        <span className="font-bold text-m sm:text-xl flex">
+          <span className="text-orange-600">G</span>
+          <span className="text-black dark:text-gray-100">2I</span>
+        </span>
       </div>
+    )}
+  </Link>
+</div>
 
+
+
+
+      {/* Menu principal */}
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar flex-1">
-        <nav className="mb-6">
+        <nav className="flex-1">
           <h2
-            className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-              !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+            className={`mb-3 sm:mb-4 text-[10px] sm:text-xs uppercase flex leading-[18px] sm:leading-[20px] text-gray-400 dark:text-gray-500 font-semibold ${
+              !isVisible ? "sm:justify-center" : "justify-start"
             }`}
           >
-            {isVisible ? "Menu Principal" : <HorizontaLDots className="size-6" />}
+            {isVisible ? "Menu Principal" : <HorizontaLDots className="size-5 sm:size-6" />}
           </h2>
           {renderMenuItems(navItems)}
         </nav>
 
-        {/* Bouton Déconnexion en bas */}
-        <div className="mt-auto mb-6">
+        {/* Bouton Déconnexion responsive */}
+        <div className="mt-auto pt-4 sm:pt-6 pb-3 sm:pb-4 border-t border-gray-200 dark:border-gray-800">
           <button
             onClick={async () => {
               await logout();
               navigate("/signin");
             }}
-            className="flex items-center gap-3 w-full px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg"
+            className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 rounded-lg transition-colors duration-200 ${
+              !isVisible ? "sm:justify-center" : "justify-start"
+            }`}
+            title="Déconnexion"
           >
-            <PlugInIcon className="w-5 h-5" />
+            <PlugInIcon className="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0" />
             {isVisible && <span>Déconnexion</span>}
           </button>
         </div>

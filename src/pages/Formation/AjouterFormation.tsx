@@ -1,61 +1,79 @@
-import { useState } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
-import FormationForm from "../../components/form/formFormation/FormationForm";
-import Button from "../../components/ui/button/Button";
+import FormationForm, { FormationFormRef } from "../../components/form/formFormation/FormationForm";
 import { ajouterFormateur, ajouterFormation } from "../../api/formationService";
 import { ajouterParticipation } from "../../api/participationService";
+import { autoMarkPresences } from "../../api/presenceFormationService";
 
 export default function AjouterFormation() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<any>(null);
-  const [selectedPersonnesConcernees, setSelectedPersonnesConcernees] = useState<number[]>([]);
+  const formRef = useRef<FormationFormRef>(null);
 
-  const handleFormationSubmit = async () => {
-    if (!formData) {
-      alert("Veuillez remplir le formulaire avant de soumettre.");
-      return;
+  const handleSubmit = async () => {
+    if (!formRef.current) return alert("Formulaire incomplet");
+    const data = formRef.current.getFormData();
+
+    if (!data || !data.theme || !data.lieu || !data.type || !data.service) {
+      return alert("Veuillez remplir toutes les informations obligatoires");
     }
 
     try {
-      let formateurId = formData.formateur?.id;
+      let formateurId = data.formateur?.id || null;
 
-      // Création du formateur si nouveau
-      if (!formateurId) {
-        const formateur = await ajouterFormateur({
-          cneFormateur: formData.formateur.cneFormateur,
-          nomFormateur: formData.formateur.nomFormateur,
-          typeFormateur: formData.formateur.typeFormateur,
-        });
+      // Ajouter formateur si nouveau
+      if (!formateurId && data.formateur) {
+        const formateur = await ajouterFormateur(data.formateur);
         formateurId = formateur.id;
       }
 
-      // Création de la formation
+      // Ajouter formation
       const formation = await ajouterFormation({
-        theme: formData.theme,
-        lieu: formData.lieu,
-        type: formData.type,
-        statut: formData.statut,
-        dateDebut: formData.dateDebut,
-        dateFin: formData.dateFin,
-        formateur: { id: formateurId },
-        service: { id: formData.service.id },
+        theme: data.theme,
+        lieu: data.lieu,
+        type: data.type,
+        statut: data.statut,
+        dateDebut: data.dateDebut,
+        dateFin: data.dateFin,
+        formateur: formateurId ? { id: formateurId } : null,
+        service: { id: data.service.id },
       });
 
       // Ajouter participations
-      if (selectedPersonnesConcernees.length > 0) {
+      if (data.employees?.length > 0) {
         await Promise.all(
-          selectedPersonnesConcernees.map((id) =>
-            ajouterParticipation({ employe: { id }, formation: { id: formation.id } })
+          data.employees.map((emp: { id: number }) =>
+            ajouterParticipation({ employe: { id: emp.id }, formation: { id: formation.id } })
           )
         );
       }
 
+      // Marquer automatiquement les présences pour toutes les dates de la formation
+const today = new Date();
+const dateDebutFormation = new Date(data.dateDebut);
+const dateFinFormation = new Date(data.dateFin);
+
+if (dateFinFormation < today && data.employees?.length > 0) {
+  const employeIds = data.employees.map((emp: { id: number }) => emp.id);
+
+  const currentDate = new Date(dateDebutFormation);
+  while (currentDate <= dateFinFormation) {
+    const dateStr = currentDate.toISOString().split("T")[0]; // format YYYY-MM-DD
+    await autoMarkPresences({
+      formationId: formation.id,
+      datePresence: dateStr,
+      employeIds,
+    });
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+}
+
+
       alert("Formation ajoutée avec succès !");
       navigate("/formation");
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error("Erreur ajout formation:", err);
       alert("Erreur lors de l'ajout de la formation");
     }
   };
@@ -65,15 +83,8 @@ export default function AjouterFormation() {
       <PageMeta title="Ajouter Formation" description="Page d'ajout de formation" />
       <PageBreadcrumb pageTitle="Ajouter Formation" />
 
-      <div className="max-w-4xl mx-auto mt-6 rounded-2xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
-        <FormationForm
-          onDataChange={setFormData}
-          onSelectedEmployeesChange={setSelectedPersonnesConcernees}
-        />
-
-        <div className="m-6 flex justify-center">
-          <Button onClick={handleFormationSubmit}>Ajouter Formation</Button>
-        </div>
+      <div className="mt-6 rounded-2xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
+        <FormationForm ref={formRef} onSubmit={handleSubmit} />
       </div>
     </div>
   );

@@ -1,21 +1,32 @@
 import React, { useState, useMemo, useEffect } from "react";
-
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/table/index";
 import Select from "./ui/Select";
 import SearchInput from "./ui/SearchInput";
 import Pagination from "./ui/Pagination";
 import { getAllEmployees } from "../../api/employeeService";
 
+interface Employee {
+  id: number;
+  nom: string;
+  prenom: string;
+  cne: string;
+  email: string;
+  fonction: string;
+  service: { nom: string };
+  dateRecrutement: string;
+}
+
 type SelectDataTableProps = {
-  onSelectionChange?: (selectedIds: number[]) => void;
+  selected: Employee[];
+  onSelectionChange?: (selected: Employee[]) => void;
 };
 
-const SelectDataTable = ({ onSelectionChange }: SelectDataTableProps) => {
-  const [employeeData, setEmployeeData] = useState<any[]>([]);
+const SelectDataTable = ({ selected, onSelectionChange }: SelectDataTableProps) => {
+  const [employeeData, setEmployeeData] = useState<Employee[]>([]);
   const [entriesPerPage, setEntriesPerPage] = useState("5");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>(selected);
 
   const entriesOptions = [
     { value: "5", label: "5" },
@@ -39,14 +50,11 @@ const SelectDataTable = ({ onSelectionChange }: SelectDataTableProps) => {
 
   useEffect(() => {
     setCurrentPage(1);
-    setSelectedIds([]);
   }, [searchTerm, entriesPerPage]);
 
   useEffect(() => {
-    if (onSelectionChange) {
-      onSelectionChange(selectedIds);
-    }
-  }, [selectedIds, onSelectionChange]);
+    if (onSelectionChange) onSelectionChange(selectedEmployees);
+  }, [selectedEmployees, onSelectionChange]);
 
   const filteredData = useMemo(() => {
     const lower = searchTerm.toLowerCase();
@@ -70,28 +78,41 @@ const SelectDataTable = ({ onSelectionChange }: SelectDataTableProps) => {
     filteredData.length
   )} sur ${filteredData.length} employés`;
 
-  const allSelected =
-    selectedIds.length === currentData.length && currentData.length > 0;
+  const allSelected = currentData.every((emp) =>
+    selectedEmployees.some((s) => s.id === emp.id)
+  );
   const toggleSelectAll = () => {
-    if (allSelected) setSelectedIds([]);
-    else setSelectedIds(currentData.map((emp) => emp.id));
+    if (allSelected) {
+      setSelectedEmployees((prev) =>
+        prev.filter((p) => !currentData.some((c) => c.id === p.id))
+      );
+    } else {
+      setSelectedEmployees((prev) => [
+        ...prev,
+        ...currentData.filter((c) => !prev.some((p) => p.id === c.id)),
+      ]);
+    }
   };
 
-  const toggleSelectOne = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+  const toggleSelectOne = (emp: Employee) => {
+    setSelectedEmployees((prev) =>
+      prev.some((p) => p.id === emp.id)
+        ? prev.filter((p) => p.id !== emp.id)
+        : [...prev, emp]
     );
   };
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg shadow-md">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-        <div className="flex items-center gap-2">
+      {/* Contrôles responsive */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 flex-wrap">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-gray-600 dark:text-gray-400 text-sm">Afficher</span>
           <Select
             value={entriesPerPage}
             onChange={setEntriesPerPage}
             options={entriesOptions}
+            className="w-20"
           />
           <span className="text-gray-600 dark:text-gray-400 text-sm">entrées</span>
         </div>
@@ -99,15 +120,16 @@ const SelectDataTable = ({ onSelectionChange }: SelectDataTableProps) => {
           value={searchTerm}
           onChange={setSearchTerm}
           placeholder="Recherche..."
-          className="sm:w-80"
+          className="sm:w-80 w-full"
         />
       </div>
 
+      {/* Tableau responsive */}
       <div className="overflow-x-auto">
-        <Table>
+        <Table className="w-full table-auto">
           <TableHeader>
             <TableRow className="border-b border-gray-300 dark:border-gray-700">
-              <TableCell className="px-6 py-3">
+              <TableCell className="px-3 py-2">
                 <input
                   type="checkbox"
                   checked={allSelected}
@@ -126,7 +148,7 @@ const SelectDataTable = ({ onSelectionChange }: SelectDataTableProps) => {
                 <TableCell
                   key={idx}
                   isHeader
-                  className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left"
+                  className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left"
                 >
                   {col}
                 </TableCell>
@@ -150,30 +172,30 @@ const SelectDataTable = ({ onSelectionChange }: SelectDataTableProps) => {
                   key={emp.id}
                   className="border-b border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <TableCell className="px-6 py-3">
+                  <TableCell className="px-3 py-2">
                     <input
                       type="checkbox"
-                      checked={selectedIds.includes(emp.id)}
-                      onChange={() => toggleSelectOne(emp.id)}
+                      checked={selectedEmployees.some((s) => s.id === emp.id)}
+                      onChange={() => toggleSelectOne(emp)}
                       className="accent-blue-600"
                     />
                   </TableCell>
-                  <TableCell className="px-6 py-3 font-medium text-gray-900 dark:text-white">
+                  <TableCell className="px-3 py-2 font-medium text-gray-900 dark:text-white">
                     {emp.nom} {emp.prenom}
                   </TableCell>
-                  <TableCell className="px-6 py-3 text-gray-600 dark:text-gray-300">
+                  <TableCell className="px-3 py-2 text-gray-600 dark:text-gray-300">
                     {emp.cne}
                   </TableCell>
-                  <TableCell className="px-6 py-3 text-gray-600 dark:text-gray-300">
+                  <TableCell className="px-3 py-2 text-gray-600 dark:text-gray-300">
                     {emp.email}
                   </TableCell>
-                  <TableCell className="px-6 py-3 text-gray-600 dark:text-gray-300">
+                  <TableCell className="px-3 py-2 text-gray-600 dark:text-gray-300">
                     {emp.fonction ?? "-"}
                   </TableCell>
-                  <TableCell className="px-6 py-3 text-blue-600 dark:text-blue-400">
+                  <TableCell className="px-3 py-2 text-blue-600 dark:text-blue-400">
                     {emp.service?.nom ?? "-"}
                   </TableCell>
-                  <TableCell className="px-6 py-3 text-gray-600 dark:text-gray-300">
+                  <TableCell className="px-3 py-2 text-gray-600 dark:text-gray-300">
                     {emp.dateRecrutement}
                   </TableCell>
                 </TableRow>
@@ -183,7 +205,8 @@ const SelectDataTable = ({ onSelectionChange }: SelectDataTableProps) => {
         </Table>
       </div>
 
-      <div className="mt-4 border-t border-gray-300 dark:border-gray-700 px-6 py-3 flex justify-between items-center">
+      {/* Pagination */}
+      <div className="mt-4 border-t border-gray-300 dark:border-gray-700 px-3 py-2 flex flex-col sm:flex-row justify-between items-center gap-2">
         <div className="text-sm text-gray-600 dark:text-gray-400">{showingText}</div>
         <Pagination
           currentPage={currentPage}

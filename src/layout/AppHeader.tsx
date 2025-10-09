@@ -82,19 +82,31 @@ const AppHeader: React.FC = () => {
             )}
             {/* Cross Icon */}
           </button>
+<Link to="/" className="lg:hidden flex flex-col items-start">
+  {/* Mode clair */}
+  <span className="dark:hidden text-left">
+    <span className="text-3xl font-extrabold text-gray-900">
+      <span className="text-orange-500">G</span>lobex
+    </span>
+    <br />
+    <span className="text-xl font-semibold text-gray-700 tracking-wide">
+      <span className="text-orange-500">I</span>nstrumentation{' '}
+      <span className="text-orange-500">I</span>ndustrielle
+    </span>
+  </span>
 
-          <Link to="/" className="lg:hidden">
-            <img
-              className="dark:hidden"
-              src="./images/logo/logo.svg"
-              alt="Logo"
-            />
-            <img
-              className="hidden dark:block"
-              src="./images/logo/logo-dark.svg"
-              alt="Logo"
-            />
-          </Link>
+  {/* Mode sombre */}
+  <span className="hidden dark:flex flex-col text-left">
+    <span className="text-3xl font-extrabold text-white">
+      <span className="text-orange-500">G</span>lobex
+    </span>
+    <span className="text-xl font-semibold text-gray-300 tracking-wide">
+      <span className="text-orange-500">I</span>nstrumentation{' '}
+      <span className="text-orange-500">I</span>ndustrielle
+    </span>
+  </span>
+</Link>
+
 
           <button
             onClick={toggleApplicationMenu}
