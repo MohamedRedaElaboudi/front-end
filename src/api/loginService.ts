@@ -4,9 +4,15 @@ import { API_BASE_URL } from "../config/api";
 
 interface LoginResponse {
   token: string;
+  email: string;
+  role: string;
 }
 
-export async function login(email: string, motDePasse: string): Promise<string> {
+// --- Login ---
+export async function login(
+  email: string,
+  motDePasse: string
+): Promise<{ token: string; email: string; role: string }> {
   try {
     const response = await axios.post<LoginResponse>(
       `${API_BASE_URL}/auth/login`,
@@ -14,12 +20,14 @@ export async function login(email: string, motDePasse: string): Promise<string> 
       { headers: { "Content-Type": "application/json" } }
     );
 
-    const token = response.data.token;
+    const { token, email: userEmail, role } = response.data;
 
-    // Stocker le token dans localStorage
+    // Stockage local
     localStorage.setItem("jwtToken", token);
+    localStorage.setItem("userEmail", userEmail);
+    localStorage.setItem("userRole", role);
 
-    return token;
+    return { token, email: userEmail, role };
   } catch (error: any) {
     throw new Error(
       error?.response?.data?.message || error?.message || "Erreur lors de la connexion"
@@ -27,19 +35,25 @@ export async function login(email: string, motDePasse: string): Promise<string> 
   }
 }
 
+// --- Get token/email/role ---
 export function getToken(): string | null {
   return localStorage.getItem("jwtToken");
 }
 
-/**
- * Déconnecte côté client et serveur
- */
+export function getUserEmail(): string | null {
+  return localStorage.getItem("userEmail");
+}
+
+export function getUserRole(): string | null {
+  return localStorage.getItem("userRole");
+}
+
+// --- Logout ---
 export async function logout(): Promise<void> {
   const token = getToken();
 
   try {
     if (token) {
-      // Appel API logout si le backend gère ça
       await axios.post(
         `${API_BASE_URL}/auth/logout`,
         {},
@@ -48,8 +62,9 @@ export async function logout(): Promise<void> {
     }
   } catch (error) {
     console.warn("Erreur côté serveur lors du logout :", error);
-    // même si erreur côté serveur, on supprime le token local
   } finally {
     localStorage.removeItem("jwtToken");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("userRole");
   }
 }

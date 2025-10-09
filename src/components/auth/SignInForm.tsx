@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { login } from "../../api/loginService";
+import { useAuth } from "../../context/AuthContext";
 
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
@@ -15,6 +15,7 @@ export default function SignInForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,16 +23,15 @@ export default function SignInForm() {
     setError(null);
 
     try {
-      const token = await login(email, password);
-      localStorage.setItem("token", token);
-      navigate("/"); 
+      await login(email, password); // récupère token/email/role et stocke
+      navigate("/"); // redirection vers dashboard
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Erreur lors de la connexion");
     }
   };
 
   return (
-    <div className="flex flex-col flex-1">
+   <div className="flex flex-col flex-1">
       <div className="w-full max-w-md pt-10 mx-auto">
         <a
           href="/"
