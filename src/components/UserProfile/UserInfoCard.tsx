@@ -4,28 +4,35 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import { useAuth } from "../../context/AuthContext"; 
 
 // Import du service API
 import {
-  getResponsableMe,
+  getResponsableByEmail, // Add this import
   updateResponsable,
   Responsable,
 } from "../../api/responsableService";
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
+  const { email } = useAuth(); // Get email from useAuth
 
   const [responsable, setResponsable] = useState<Responsable | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Charger le responsable connecté
+  // Charger le responsable connecté par email
   useEffect(() => {
-    getResponsableMe()
-      .then(setResponsable)
-      .catch((err) => console.error("Erreur chargement responsable:", err))
-      .finally(() => setLoading(false));
-  }, []);
+    if (email) {
+      getResponsableByEmail(email)
+        .then(setResponsable)
+        .catch((err) => console.error("Erreur chargement responsable:", err))
+        .finally(() => setLoading(false));
+    } else {
+      console.error("Email non disponible");
+      setLoading(false);
+    }
+  }, [email]); // Add email as a dependency
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!responsable) return;
@@ -58,10 +65,10 @@ export default function UserInfoCard() {
           </h4>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-            <InfoItem label="First Name" value={responsable.cne} />
-            <InfoItem label="Last Name" value={responsable.prenom} />
+            <InfoItem label="First Name" value={responsable.prenom} />
+            <InfoItem label="Last Name" value={responsable.nom} />
             <InfoItem label="Email" value={responsable.email} />
-            <InfoItem label="CNI" value={responsable.cne || "N/A"} />
+            <InfoItem label="Username" value={responsable.username || "N/A"} />
             <InfoItem label="Bio" value={responsable.fonction || "N/A"} />
           </div>
         </div>

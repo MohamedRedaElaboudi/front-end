@@ -35,6 +35,7 @@ import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
 import PageAvecQcm from "./pages/qcm/parent";
 import Example from "./components/charts/pie/chartPie";
+import MonComposant from "./pages/Test";
 
 export default function App() {
   return (
@@ -86,6 +87,9 @@ export default function App() {
         {/* Routes sans Dashboard / sidebar */}
         <Route path="/evaluationformationachaud/:formationId" element={<PageAvecQcm />} />
         <Route path="/test/:formationId" element={<PageAvecQcm />} />
+
+        <Route path="/test" element={<MonComposant/>} />
+
 
         {/* Fallback */}
         <Route path="*" element={<NotFound />} />
