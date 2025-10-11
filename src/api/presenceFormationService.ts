@@ -63,7 +63,6 @@ export async function getPresenceById(
   }
 }
 
-// --- Créer une présence ---
 export async function createPresence(
   presence: PresenceFormation
 ): Promise<PresenceFormation> {
@@ -72,6 +71,7 @@ export async function createPresence(
   });
   return response.data;
 }
+
 
 // --- Récupérer les présences groupées par employé ---
 export async function getGroupedPresencesByEmploye(
@@ -82,6 +82,7 @@ export async function getGroupedPresencesByEmploye(
   );
   return response.data;
 }
+
 export async function autoMarkPresences(payload: {
   formationId: number;
   datePresence: string;

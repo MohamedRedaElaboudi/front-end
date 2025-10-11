@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom"; // <== corrigé
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/table";
 import Button from "../Tables/ui/Button";
 import { getAllParticipants } from "../../api/participationService";
-import { createPresence, getPresencesByFormation } from "../../api/presenceFormationService";
+import { createPresence, getPresencesByFormation, PresenceFormation } from "../../api/presenceFormationService";
 import { getFormationById } from "../../api/formationService";
 
 interface Participant {
@@ -48,8 +48,7 @@ const FichePresence = () => {
 
     getFormationById(idFormation).then((data) => {
       setFormation(data);
-      const dates = getDatesBetween(data.dateDebut, data.dateFin);
-      setPresenceDates(dates);
+      setPresenceDates(getDatesBetween(data.dateDebut, data.dateFin));
     });
   }, [idFormation]);
 
@@ -61,14 +60,12 @@ const FichePresence = () => {
       ([participants, presences]) => {
         const presenceMap: { [key: string]: boolean } = {};
         presences.forEach((p: any) => {
-          // true = absent si statut = ABSENT
           presenceMap[`${p.employe.id}-${p.datePresence}`] = p.statut === "ABSENT";
         });
 
         const formatted: Participant[] = participants.map((p: any) => {
           const presence: { [date: string]: boolean } = {};
           presenceDates.forEach((date) => {
-            // Par défaut présent => donc absent = false
             presence[date] = presenceMap[`${p.employe.id}-${date}`] ?? false;
           });
           return {
@@ -95,26 +92,33 @@ const FichePresence = () => {
     );
   };
 
-  // Enregistre toutes les présences
-  const handleSaveAllPresences = async () => {
-    try {
-      for (const participant of participantData) {
-        for (const date of presenceDates) {
-          const statut = participant.presence[date] ? "ABSENT" : "PRESENT";
-          await createPresence({
-            employe: { id: participant.id },
-            formation: { id: idFormation },
-            statut,
-            datePresence: date,
-          });
-        }
+ const handleSaveAllPresences = async () => {
+  if (!idFormation) return;
+
+  try {
+    for (const participant of participantData) {
+      for (const date of presenceDates) {
+        const statut = participant.presence[date] ? "ABSENT" : "PRESENT";
+
+        // Solution simple : ne garder que l'id
+        const payload = {
+          employe: { id: participant.id },
+          formation: { id: idFormation },
+          datePresence: date,
+          statut,
+        };
+
+        await createPresence(payload as PresenceFormation);
       }
-      alert("Présences enregistrées avec succès !");
-    } catch (error) {
-      console.error(error);
-      alert("Erreur lors de l'enregistrement.");
     }
-  };
+
+    alert("Présences enregistrées avec succès !");
+  } catch (error) {
+    console.error("Erreur lors de l'enregistrement des présences :", error);
+    alert("Erreur lors de l'enregistrement.");
+  }
+};
+
 
   if (!idFormation)
     return <div className="text-gray-800 dark:text-gray-200">Formation non spécifiée.</div>;
@@ -147,26 +151,10 @@ const FichePresence = () => {
         <Table className="min-w-full">
           <TableHeader>
             <TableRow className="bg-gray-100 dark:bg-gray-700">
-              <TableCell
-                isHeader
-                className="px-4 py-2 text-gray-600 dark:text-gray-300"
-              >
-                Nom
-              </TableCell>
-              <TableCell
-                isHeader
-                className="px-4 py-2 text-gray-600 dark:text-gray-300"
-              >
-                Fonction
-              </TableCell>
+              <TableCell isHeader className="px-4 py-2 text-gray-600 dark:text-gray-300">Nom</TableCell>
+              <TableCell isHeader className="px-4 py-2 text-gray-600 dark:text-gray-300">Fonction</TableCell>
               {presenceDates.map((date) => (
-                <TableCell
-                  isHeader
-                  key={date}
-                  className="px-4 py-2 text-gray-600 dark:text-gray-300"
-                >
-                  {date}
-                </TableCell>
+                <TableCell key={date} isHeader className="px-4 py-2 text-gray-600 dark:text-gray-300">{date}</TableCell>
               ))}
             </TableRow>
           </TableHeader>
@@ -174,33 +162,21 @@ const FichePresence = () => {
           <TableBody>
             {participantData.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={presenceDates.length + 2}
-                  className="text-center py-4 text-gray-500 dark:text-gray-400"
-                >
+                <TableCell colSpan={presenceDates.length + 2} className="text-center py-4 text-gray-500 dark:text-gray-400">
                   Aucun participant trouvé.
                 </TableCell>
               </TableRow>
             ) : (
               participantData.map((part) => (
-                <TableRow
-                  key={part.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <TableCell className="px-4 py-2 text-gray-900 dark:text-white">
-                    {part.name}
-                  </TableCell>
-                  <TableCell className="px-4 py-2 text-gray-700 dark:text-gray-300 text-center">
-                    {part.fonction}
-                  </TableCell>
+                <TableRow key={part.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <TableCell className="px-4 py-2 text-gray-900 dark:text-white">{part.name}</TableCell>
+                  <TableCell className="px-4 py-2 text-gray-700 dark:text-gray-300 text-center">{part.fonction}</TableCell>
                   {presenceDates.map((date) => (
                     <TableCell key={date} className="px-4 py-2 text-center">
                       <input
                         type="checkbox"
-                        checked={part.presence[date]} // coché = absent
-                        onChange={(e) =>
-                          handlePresenceChange(part.id, date, e.target.checked)
-                        }
+                        checked={part.presence[date]}
+                        onChange={(e) => handlePresenceChange(part.id, date, e.target.checked)}
                         className="cursor-pointer"
                       />
                     </TableCell>
@@ -217,6 +193,7 @@ const FichePresence = () => {
         <Button variant="primary" onClick={handleSaveAllPresences}>
           Enregistrer
         </Button>
+        
       </div>
     </div>
   );
