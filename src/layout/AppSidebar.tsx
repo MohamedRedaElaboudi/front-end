@@ -186,30 +186,25 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
- <div className="flex items-center justify-center w-full border-b border-gray-200 dark:border-gray-800 py-1 sm:py-2">
-  <Link to="/" className="flex items-center transition-all duration-300">
-    {isVisible ? (
-      // Sidebar ouverte → afficher logo image plus grand
-      <img
-        src="../images/logo/logo.png" // remplacer par ton image/SVG
-        alt="Globex Instrumentation"
-        className="h-25 sm:h-25 w-50" // agrandi
-      />
-    ) : (
-      // Sidebar réduite → afficher G2I
-      <div
-        className={`w-15 h-15 sm:w-14 sm:h-14  rounded-full flex items-center justify-center flex-shrink-0
-                    transition-transform duration-300 transform hover:scale-105`}
-      >
-        <span className="font-bold text-m sm:text-xl flex">
-          <span className="text-orange-600">G</span>
-          <span className="text-black dark:text-gray-100">2I</span>
-        </span>
+  {/* Logo responsive */}
+      <div className="flex items-center justify-center w-full border-b border-gray-200 dark:border-gray-800 ">
+        <Link to="/" className="flex items-center transition-all duration-300">
+          {isVisible ? (
+            <img
+              src="../images/logo/logo.png"
+              alt="Globex Instrumentation"
+              className="h-30 w-auto"
+            />
+          ) : (
+            <div className="rounded-full flex items-center justify-center w-10 h-10 transition-transform hover:scale-105  my-3">
+              <span className="font-bold text-lg flex">
+                <span className="text-orange-600">G</span>
+                <span className="text-black dark:text-gray-100">2I</span>
+              </span>
+            </div>
+          )}
+        </Link>
       </div>
-    )}
-  </Link>
-</div>
-
 
 
 

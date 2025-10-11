@@ -50,10 +50,19 @@ export async function ajouterFormation(formation: {
   return response.data;
 }
 
-export async function updateFormation(id: number, formation: any) {
+export async function updateFormation(id: number, formation: {
+  theme: string;
+  lieu: string;
+  type: string;
+  statut: string;
+  dateDebut: string;
+  dateFin: string;
+  formateur: { id: number };
+}) {
   const response = await apiClient.put(`${API_URL}/formations/${id}`, formation);
   return response.data;
 }
+
 
 // --- Formateurs ---
 export async function getAllFormateurs() {

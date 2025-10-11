@@ -3,10 +3,12 @@ import apiClient from "./intercepteur";
 
 const API_URL = API_BASE_URL;
 
-// Ajouter une participation
-export async function ajouterParticipation(data: { employe: { id: number }; formation: { id: number } }) {
+// ✅ Ajouter une participation (format simple)
+export async function ajouterParticipation(data: { employeId: number; formationId: number }) {
   return apiClient.post(`${API_URL}/participations`, data).then(res => res.data);
 }
+
+ 
 
 // Récupérer toutes les formations (pour Select)
 export async function getAllFormations() {

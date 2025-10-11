@@ -41,7 +41,6 @@ export default function Formation() {
     fetchStats();
   }, []);
 
-  // Calcul du total exact
   const totalFormations =
     (stats["VALIDE"] || 0) +
     (stats["Non_valide"] || 0) +
@@ -61,7 +60,7 @@ export default function Formation() {
       <PageMeta title="Gestionnaire des Formations" />
       <PageBreadcrumb pageTitle="Gestionnaire des Formations" />
 
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+<div className="w-full overflow-x-hidden px-4 sm:px-6 lg:px-8 py-4 transition-all duration-300 lg:ml-0">
         {/* Header */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Liste des Formations</h1>
@@ -69,7 +68,7 @@ export default function Formation() {
         </div>
 
         {/* Cards dynamiques */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6 w-full">
           {cards.map((card) => (
             <div
               key={card.title}
@@ -83,7 +82,7 @@ export default function Formation() {
         </div>
 
         {/* Tableau des formations */}
-        <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-md overflow-x-auto">
+        <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-md w-full overflow-hidden">
           <FormationTable />
         </div>
       </div>

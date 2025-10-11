@@ -53,16 +53,27 @@ export default function FormationCard({ formationId }: { formationId: number }) 
   }, [formationId]);
 
   const handleSave = async () => {
-    try {
-      const updated = await updateFormation(formationId, editedFormation);
-      setFormation(updated);
-      closeModal();
-      alert("Formation mise à jour avec succès !");
-    } catch (error: any) {
-      console.error("Erreur sauvegarde formation", error);
-      alert(`Erreur lors de la sauvegarde : ${error.message || error}`);
-    }
-  };
+  try {
+    // On prépare le format exact attendu par l’API
+    const formattedData = {
+      theme: editedFormation.theme,
+      lieu: editedFormation.lieu,
+      type: editedFormation.type,
+      statut: editedFormation.statut || formation.statut, // garde le statut existant
+      dateDebut: editedFormation.dateDebut,
+      dateFin: editedFormation.dateFin,
+      formateur: { id: editedFormation.formateur?.id },
+    };
+
+    const updated = await updateFormation(formationId, formattedData);
+    setFormation(updated);
+    closeModal();
+    alert("Formation mise à jour avec succès !");
+  } catch (error: any) {
+    console.error("Erreur sauvegarde formation", error);
+    alert(`Erreur lors de la sauvegarde : ${error.response?.data?.message || error.message}`);
+  }
+}
 
   const handleSaveParticipants = async () => {
     try {
