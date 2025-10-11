@@ -19,7 +19,7 @@ export default function CinInput() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen space-y-6 bg-gray-50 dark:bg-gray-950">
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+      <h2 className="text-2xl font-bold text-gray-800 ">
         Entrer votre CIN
       </h2>
 
@@ -32,7 +32,7 @@ export default function CinInput() {
         className="w-64 px-4 py-2 border-2 rounded-xl text-center 
                    focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase
                    bg-white text-gray-900 border-gray-300
-                   dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
+                   dark:bg-gray-800  dark:border-gray-600"
       />
 
       {/* Bouton Enregistrer */}
@@ -51,7 +51,7 @@ export default function CinInput() {
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 w-96 text-center">
             {employee ? (
               <>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
+                <h3 className="text-lg font-bold text-gray-800  mb-4">
                   Employé trouvé
                 </h3>
                 <p className="text-gray-700 dark:text-gray-200">
