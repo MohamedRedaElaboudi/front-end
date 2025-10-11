@@ -158,12 +158,7 @@ const QuestionConfig = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Gestionnaire des Questions</h1>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="p-3 rounded-full bg-white dark:bg-gray-800 shadow hover:scale-110 transition"
-          >
-            {darkMode ? <Sun className="w-6 h-6 text-yellow-400" /> : <Moon className="w-6 h-6 text-gray-800" />}
-          </button>
+          
         </div>
 
         {/* Bouton d'ajout */}

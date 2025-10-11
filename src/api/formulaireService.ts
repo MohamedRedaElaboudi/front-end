@@ -1,25 +1,22 @@
-import axios from "axios";
-import { API_BASE_URL } from "../config/api"; // Assure-toi que cette constante est bien définie
+import apiClient from "./intercepteur"; // ✅ on utilise le même intercepteur
+import { API_BASE_URL } from "../config/api";
 
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { "Content-Type": "application/json" },
-});
+const API_URL = API_BASE_URL;
 
 /* ================== Réponses Utilisateur ================== */
 export const ReponsesUtilisateurService = {
   getAll: async () => {
-    const response = await apiClient.get("/reponses-utilisateurs");
+    const response = await apiClient.get(`${API_URL}/reponses-utilisateurs`);
     return response.data;
   },
 
   add: async (data: any) => {
-    const response = await apiClient.post("/reponses-utilisateurs", data);
+    const response = await apiClient.post(`${API_URL}/reponses-utilisateurs`, data);
     return response.data;
   },
 
   addMany: async (data: any[]) => {
-    const response = await apiClient.post("/reponses-utilisateurs/add-many", data);
+    const response = await apiClient.post(`${API_URL}/reponses-utilisateurs/add-many`, data);
     return response.data;
   },
 };
@@ -27,27 +24,27 @@ export const ReponsesUtilisateurService = {
 /* ================== Questions Standard ================== */
 export const QuestionsService = {
   getAll: async () => {
-    const response = await apiClient.get("/question-standard");
+    const response = await apiClient.get(`${API_URL}/question-standard`);
     return response.data;
   },
 
   getById: async (id: number) => {
-    const response = await apiClient.get(`/question-standard/${id}`);
+    const response = await apiClient.get(`${API_URL}/question-standard/${id}`);
     return response.data;
   },
 
   create: async (data: { texteQuestion: string; reponsesPossibles: string[] }) => {
-    const response = await apiClient.post("/question-standard", data);
+    const response = await apiClient.post(`${API_URL}/question-standard`, data);
     return response.data;
   },
 
   update: async (id: number, data: { texteQuestion: string; reponsesPossibles: string[] }) => {
-    const response = await apiClient.put(`/question-standard/${id}`, data);
+    const response = await apiClient.put(`${API_URL}/question-standard/${id}`, data);
     return response.data;
   },
 
   delete: async (id: number) => {
-    const response = await apiClient.delete(`/question-standard/${id}`);
+    const response = await apiClient.delete(`${API_URL}/question-standard/${id}`);
     return response.data;
   },
 };
@@ -55,12 +52,12 @@ export const QuestionsService = {
 /* ================== Formulaires de Formation ================== */
 export const FormulairesService = {
   getById: async (id: number) => {
-    const response = await apiClient.get(`/formulaires/${id}`);
+    const response = await apiClient.get(`${API_URL}/formulaires/${id}`);
     return response.data;
   },
 
   getByFormationId: async (formationId: number) => {
-    const response = await apiClient.get(`/formulaires/formation/${formationId}`);
+    const response = await apiClient.get(`${API_URL}/formulaires/formation/${formationId}`);
     return response.data;
   },
 };
@@ -68,17 +65,17 @@ export const FormulairesService = {
 /* ================== Réponses Possibles ================== */
 export const ReponsesPossiblesService = {
   getAll: async () => {
-    const response = await apiClient.get("/reponses-possibles");
+    const response = await apiClient.get(`${API_URL}/reponses-possibles`);
     return response.data;
   },
 
   add: async (data: any) => {
-    const response = await apiClient.post("/reponses-possibles", data);
+    const response = await apiClient.post(`${API_URL}/reponses-possibles`, data);
     return response.data;
   },
 
   getByQuestion: async (questionId: number) => {
-    const response = await apiClient.get(`/reponses-possibles/question/${questionId}`);
+    const response = await apiClient.get(`${API_URL}/reponses-possibles/question/${questionId}`);
     return response.data;
   },
 };
