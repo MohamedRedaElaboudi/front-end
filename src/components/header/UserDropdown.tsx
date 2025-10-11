@@ -6,11 +6,13 @@ import { useAuth } from "../../context/AuthContext";
 import { getResponsableByEmail, Responsable } from "../../api/responsableService";
 import { logout } from "../../api/loginService";
 
+import { FiUser, FiSettings, FiLogOut, FiChevronDown } from "react-icons/fi";
+
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<Responsable | null>(null);
   const navigate = useNavigate();
-  const { email } = useAuth(); // Récupère l'email depuis le contexte
+  const { email } = useAuth();
 
   const toggleDropdown = () => setIsOpen(!isOpen);
   const closeDropdown = () => setIsOpen(false);
@@ -55,24 +57,13 @@ export default function UserDropdown() {
           {user ? `${user.prenom} ${user.nom}` : "Chargement..."}
         </span>
 
-        <svg
-          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
+        {/* Icône flèche moderne */}
+        <FiChevronDown
+          className={`text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
-          width="18"
-          height="20"
-          viewBox="0 0 18 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M4.3125 8.65625L9 13.3437L13.6875 8.65625"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+          size={18}
+        />
       </button>
 
       <Dropdown
@@ -95,17 +86,29 @@ export default function UserDropdown() {
               onItemClick={closeDropdown}
               tag="a"
               to="/profile"
-              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
             >
-              Modifier le Profile
+              <FiUser className="text-gray-500 group-hover:text-blue-600" />
+              Modifier le Profil
+            </DropdownItem>
+
+            <DropdownItem
+              onItemClick={closeDropdown}
+              tag="a"
+              to="/configurations"
+              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
+            >
+              <FiSettings className="text-gray-500 group-hover:text-blue-600" />
+              Configurations
             </DropdownItem>
           </li>
         </ul>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 mt-3 w-full font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+          className="flex items-center gap-3 px-3 py-2 mt-3 w-full font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
         >
+          <FiLogOut className="text-gray-500 group-hover:text-red-500" />
           Déconnexion
         </button>
       </Dropdown>

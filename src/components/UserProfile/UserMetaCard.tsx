@@ -81,44 +81,9 @@ export default function UserMetaCard() {
             <p className="text-sm text-gray-500">{responsable.telephone || "Non renseigné"}</p>
           </div>
         </div>
-        <Button onClick={openModal}>Modifier</Button>
       </div>
 
-      {/* Modal édition */}
-      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-2xl m-4 p-7">
-        <h4 className="mb-4 text-2xl font-bold text-gray-800 dark:text-white">Modifier mes informations</h4>
-        <form className="space-y-5">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Prénom</Label>
-              <Input name="prenom" value={responsable.prenom} onChange={handleChange} />
-            </div>
-            <div>
-              <Label>Nom</Label>
-              <Input name="nom" value={responsable.nom} onChange={handleChange} />
-            </div>
-          </div>
-          <div>
-            <Label>Email</Label>
-            <Input name="email" type="email" value={responsable.email} onChange={handleChange} />
-          </div>
-          <div>
-            <Label>Téléphone</Label>
-            <Input name="telephone" value={responsable.telephone || ""} onChange={handleChange} />
-          </div>
-          <div>
-            <Label>Fonction</Label>
-            <Input name="fonction" value={responsable.fonction || ""} onChange={handleChange} />
-          </div>
-        </form>
-
-        <div className="flex justify-end gap-3 mt-6">
-          <Button variant="outline" onClick={closeModal}>Annuler</Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? "Enregistrement..." : "Sauvegarder"}
-          </Button>
-        </div>
-      </Modal>
+    
     </>
   );
 }

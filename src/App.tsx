@@ -35,7 +35,7 @@ import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
 import PageAvecQcm from "./pages/qcm/parent";
 import Example from "./components/charts/pie/chartPie";
-import MonComposant from "./pages/Test";
+import MonComposant from "./pages/QuestionConfigPage";
 
 export default function App() {
   return (
@@ -81,6 +81,8 @@ export default function App() {
           <Route path="videos" element={<Videos />} />
           <Route path="line-chart" element={<LineChart />} />
           <Route path="bar-chart" element={<BarChart />} />
+          <Route path="/configurations" element={<MonComposant/>} />
+
           <Route path="statistiqueformation/:formationId" element={<Example />} />
         </Route>
 

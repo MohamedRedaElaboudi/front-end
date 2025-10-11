@@ -16,22 +16,27 @@ const tokenHeader = () => ({
 });
 
 // 🔹 Récupérer le responsable connecté
-export const getResponsableMe = async () =>{};
+export const getResponsableMe = async () => {};
 
 // 🔹 Récupérer par ID
-export const getResponsableById = async (id: number) => (await apiClient.get(`/responsables/${id}`)).data;
+export const getResponsableById = async (id: number) =>
+  (await apiClient.get(`/responsables/${id}`)).data;
 
 // 🔹 Créer un responsable
-export const createResponsable = async (data: Partial<Responsable>) => (await apiClient.post("/responsables", data)).data;
+export const createResponsable = async (data: Partial<Responsable>) =>
+  (await apiClient.post("/responsables", data)).data;
 
 // 🔹 Modifier un responsable
-export const updateResponsable = async (id: number, data: Partial<Responsable>) => (await apiClient.put(`/responsables/${id}`, data)).data;
+export const updateResponsable = async (id: number, data: Partial<Responsable>) =>
+  (await apiClient.put(`/responsables/${id}`, data)).data;
 
 // 🔹 Supprimer un responsable
-export const deleteResponsable = async (id: number) => await apiClient.delete(`/responsables/${id}`);
+export const deleteResponsable = async (id: number) =>
+  await apiClient.delete(`/responsables/${id}`);
 
 // 🔹 Récupérer tous les responsables
-export const getAllResponsables = async () => (await apiClient.get("/responsables")).data;
+export const getAllResponsables = async () =>
+  (await apiClient.get("/responsables")).data;
 
 // 🔹 Récupérer un responsable par email (encode @ pour éviter les problèmes)
 export const getResponsableByEmail = async (email: string) => {
@@ -43,5 +48,27 @@ export const getResponsableByEmail = async (email: string) => {
   } catch (err) {
     console.error("❌ Erreur getResponsableByEmail :", err);
     return null;
+  }
+};
+
+// 🔹 Mettre à jour le mot de passe du responsable connecté
+export const updatePassword = async (
+  ancienMotDePasse: string,
+  nouveauMotDePasse: string
+) => {
+  try {
+    const res = await apiClient.put(
+      "/responsables/me/password",
+      {
+        ancienMotDePasse,
+        nouveauMotDePasse,
+      },
+      { headers: tokenHeader() }
+    );
+    console.log("✅ Mot de passe mis à jour avec succès :", res.data);
+    return res.data;
+  } catch (err) {
+    console.error("❌ Erreur lors du changement de mot de passe :", err);
+    throw err;
   }
 };
