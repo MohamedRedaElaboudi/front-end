@@ -36,7 +36,7 @@ const EmployeeForm = forwardRef<EmployeeFormHandles>((_props, ref) => {
         const servicesData: Service[] = await getAllServices();
         const options = servicesData.map((service) => ({
           value: service.id,
-          label: service.nom,
+          label: service.nom+"-"+service.domaine,
         }));
         setServices(options);
       } catch (error) {
