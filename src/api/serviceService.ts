@@ -24,13 +24,35 @@ export async function getServiceById(id: number): Promise<Service> {
 
 // --- Créer un nouveau service ---
 export async function createService(service: Omit<Service, "id">): Promise<Service> {
-  const response = await apiClient.post<Service>(API_URL, service);
-  return response.data;
+  // Vérifie que toutes les propriétés requises sont présentes
+  if (!service.nom || !service.domaine || !service.description) {
+    throw new Error("Les champs 'nom', 'domaine' et 'description' sont obligatoires.");
+  }
+
+  try {
+    const response = await apiClient.post<Service>(API_URL, {
+      nom: service.nom.trim(),
+      domaine: service.domaine.trim(),
+      description: service.description.trim(),
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Erreur lors de la création du service :", error.response?.data || error.message);
+    throw error;
+  }
 }
 
 // --- Mettre à jour un service par ID ---
 export async function updateService(id: number, service: Omit<Service, "id">): Promise<Service> {
-  const response = await apiClient.put<Service>(`${API_URL}/${id}`, service);
+  if (!service.nom || !service.domaine || !service.description) {
+    throw new Error("Les champs 'nom', 'domaine' et 'description' sont obligatoires.");
+  }
+
+  const response = await apiClient.put<Service>(`${API_URL}/${id}`, {
+    nom: service.nom.trim(),
+    domaine: service.domaine.trim(),
+    description: service.description.trim(),
+  });
   return response.data;
 }
 

@@ -1,4 +1,4 @@
-import apiClient from "./intercepteur"; // ✅ on utilise le même intercepteur
+import apiClient from "./intercepteur"; 
 import { API_BASE_URL } from "../config/api";
 
 const API_URL = API_BASE_URL;

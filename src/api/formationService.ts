@@ -3,7 +3,6 @@ import apiClient from "./intercepteur";
 
 const API_URL = API_BASE_URL;
 
-// Exporter explicitement le type Formation
 export interface Formulaire {
   id: number;
 }
@@ -25,7 +24,6 @@ export type Formation = {
   formulaire: Formulaire; 
 };
 
-// --- Formations ---
 export async function getAllFormations() {
   const response = await apiClient.get(`${API_URL}/formations`);
   console.log("Response formations API:", response.data);

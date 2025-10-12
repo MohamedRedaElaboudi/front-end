@@ -4,10 +4,9 @@ import apiClient from "./intercepteur";
 export interface QuestionStats {
   questionId: number;
   questionLibelle: string;
-  reponsePourcentages: Record<string, number>; // clé = réponse, valeur = %
+  reponsePourcentages: Record<string, number>; 
 }
 
-// 📊 Récupération des stats par question
 export const getFormationStats = async (
   formationId: number
 ): Promise<QuestionStats[]> => {
