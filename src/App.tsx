@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -38,31 +38,17 @@ import Example from "./components/charts/pie/chartPie";
 import MonComposant from "./pages/QuestionConfigPage";
 
 export default function App() {
-  const isAuthenticated = !!localStorage.getItem("jwtToken");
-
   return (
     <Router>
       <ScrollToTop />
       <Routes>
-        {/* Si non connecté → redirection vers /signin */}
-        <Route
-          path="/"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Navigate to="/signin" replace />
-            )
-          }
-        />
-
         {/* Public Routes */}
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
 
         {/* Private Routes avec Dashboard */}
         <Route
-          path="/dashboard"
+          path="/"
           element={
             <PrivateRoute>
               <AppLayout />
@@ -95,16 +81,19 @@ export default function App() {
           <Route path="videos" element={<Videos />} />
           <Route path="line-chart" element={<LineChart />} />
           <Route path="bar-chart" element={<BarChart />} />
-          <Route path="configurations" element={<MonComposant />} />
+          <Route path="/configurations" element={<MonComposant/>} />
+
           <Route path="statistiqueformation/:formationId" element={<Example />} />
         </Route>
 
-        {/* Routes sans Dashboard */}
+        {/* Routes sans Dashboard / sidebar */}
         <Route path="/evaluationformationachaud/:formationId" element={<PageAvecQcm />} />
         <Route path="/test/:formationId" element={<PageAvecQcm />} />
-        <Route path="/test" element={<MonComposant />} />
 
-        {/* Page 404 */}
+        <Route path="/test" element={<MonComposant/>} />
+
+
+        {/* Fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
